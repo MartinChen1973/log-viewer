@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>log-viewer</title>
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>Log viewer</h1>
+      <p class="meta" id="log-root" hidden></p>
+    </header>
+    <main class="layout">
+      <aside class="sidebar">
+        <label for="log-select">Log file</label>
+        <select id="log-select" aria-label="Select log file">
+          <option value="">— Loading… —</option>
+        </select>
+        <p class="hint" id="file-meta" hidden></p>
+      </aside>
+      <section class="viewer">
+        <pre id="log-content" class="log-content" aria-live="polite">Select a log file.</pre>
+      </section>
+    </main>
+    <p class="error" id="error-banner" hidden role="alert"></p>
+    <script src="js/main.js"></script>
+  </body>
+</html>

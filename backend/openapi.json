@@ -1,0 +1,120 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "log-viewer API",
+    "description": "REST API for listing and reading log files under LOG_ROOT.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Current host (Flask dev server)"
+    }
+  ],
+  "paths": {
+    "/api/logs": {
+      "get": {
+        "summary": "List log files",
+        "description": "Returns sorted filenames in the configured log directory.",
+        "operationId": "listLogs",
+        "responses": {
+          "200": {
+            "description": "Directory path and file names",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["root", "files"],
+                  "properties": {
+                    "root": { "type": "string", "description": "Absolute path to log directory" },
+                    "files": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Log root missing or not a directory",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/logs/{name}": {
+      "get": {
+        "summary": "Get log file content",
+        "description": "Reads a single file by name (no path segments). Large files may be truncated; use `tail` to limit lines.",
+        "operationId": "getLog",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "File name only (e.g. docker.log)"
+          },
+          {
+            "name": "tail",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1 },
+            "description": "If set, only the last N lines are returned (after any byte truncation)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File metadata and text content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name", "path", "size", "truncated", "content"],
+                  "properties": {
+                    "name": { "type": "string" },
+                    "path": { "type": "string" },
+                    "size": { "type": "integer" },
+                    "truncated": { "type": "boolean" },
+                    "content": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "File not found or invalid name",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Filesystem error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        }
+      }
+    }
+  }
+}
