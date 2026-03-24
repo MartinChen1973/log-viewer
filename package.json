@@ -1,0 +1,27 @@
+{
+  "name": "log-viewer",
+  "version": "1.0.0",
+  "description": "Collect and view various logs on the server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MartinChen1973/log-viewer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/MartinChen1973/log-viewer/issues"
+  },
+  "homepage": "https://github.com/MartinChen1973/log-viewer#readme",
+  "dependencies": {
+    "chokidar": "^5.0.0",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.1"
+  }
+}

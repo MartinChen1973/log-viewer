@@ -1,0 +1,26 @@
+{
+  "port": 3000,
+  "logSources": [
+    {
+      "name": "System Logs",
+      "path": "/var/log",
+      "extensions": [".log", ".txt", ""],
+      "recursive": false
+    },
+    {
+      "name": "Nginx Logs",
+      "path": "/var/log/nginx",
+      "extensions": [".log", ".txt", ""],
+      "recursive": false
+    },
+    {
+      "name": "Application Logs",
+      "path": "./logs",
+      "extensions": [".log", ".txt", ".out", ".err"],
+      "recursive": true
+    }
+  ],
+  "maxFileSizeBytes": 10485760,
+  "maxTailLines": 1000,
+  "defaultTailLines": 200
+}

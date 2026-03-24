@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log Viewer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <span class="logo">📋 Log Viewer</span>
+    </div>
+    <div class="header-right">
+      <span id="server-info" class="server-info">Loading...</span>
+      <button id="refresh-sources" class="btn btn-sm" title="Refresh file list">⟳ Refresh</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Sidebar: log sources and files -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>Log Sources</h2>
+      </div>
+      <div id="sources-list" class="sources-list">
+        <div class="loading">Loading sources...</div>
+      </div>
+    </aside>
+
+    <!-- Main content: log viewer -->
+    <main class="main-content">
+      <div id="welcome" class="welcome">
+        <div class="welcome-icon">📄</div>
+        <h2>Select a log file to view</h2>
+        <p>Choose a log file from the sidebar to start viewing its contents.</p>
+      </div>
+
+      <div id="viewer" class="viewer hidden">
+        <div class="viewer-toolbar">
+          <div class="toolbar-left">
+            <span id="current-file" class="current-file" title=""></span>
+          </div>
+          <div class="toolbar-right">
+            <input type="text" id="search-input" class="search-input" placeholder="Search (regex)..." />
+            <button id="search-btn" class="btn btn-sm">🔍 Search</button>
+            <button id="clear-search-btn" class="btn btn-sm btn-secondary hidden">✕ Clear</button>
+            <span class="separator"></span>
+            <label class="toggle-label">
+              <input type="checkbox" id="tail-toggle" />
+              <span>Live Tail</span>
+            </label>
+            <span class="separator"></span>
+            <label class="lines-label">
+              Lines:
+              <select id="lines-select">
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200" selected>200</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div id="search-results" class="search-results hidden">
+          <div class="search-header">
+            <span id="search-count"></span>
+            <button id="back-to-log-btn" class="btn btn-sm">← Back to Log</button>
+          </div>
+          <pre id="search-content" class="log-content search-log-content"></pre>
+        </div>
+
+        <div id="log-container" class="log-container">
+          <div class="log-meta">
+            <span id="file-size">Size: —</span>
+            <span id="file-mtime">Modified: —</span>
+            <button id="scroll-bottom-btn" class="btn btn-xs">↓ Scroll to bottom</button>
+            <button id="reload-btn" class="btn btn-xs">⟳ Reload</button>
+          </div>
+          <pre id="log-content" class="log-content"></pre>
+          <div id="tail-indicator" class="tail-indicator hidden">● Live</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
