@@ -4,3 +4,5 @@ __pycache__/
 .venv/
 venv/
 .specstory/
+.vscode/
+logs.zip
