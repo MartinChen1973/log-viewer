@@ -194,3 +194,19 @@
 {"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-24T11:02:00.001000001Z"}
 {"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-24T11:02:00.015000002Z"}
 {"log":"2026-03-24T11:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-24T11:03:44.551773112Z"}
+{"log": "INFO  [pool-2-thread-1] c.e.api.cache.RedisClient - cache warm-up complete, keys=3903\n", "stream": "stdout", "time": "2026-03-25T17:35:06.694327567Z"}
+{"log": "GET /api/v1/heartbeat 204 3ms\n", "stream": "stdout", "time": "2026-03-25T22:45:32.708405567Z"}
+{"log": "POST /api/v1/events 202 9ms\n", "stream": "stdout", "time": "2026-03-25T20:29:17.997976567Z"}
+{"log": "ERROR [http-nio-8080-exec-9] c.e.api.pay.PaymentClient - gateway timeout after 8407ms\n", "stream": "stderr", "time": "2026-03-25T18:47:18.334844567Z"}
+{"log": "WARN  [http-nio-8080-exec-3] c.e.api.auth.JwtFilter - token near expiry for subject=user_624\n", "stream": "stderr", "time": "2026-03-26T17:31:41.010462567Z"}
+{"log": "GET /api/v1/heartbeat 204 2ms\n", "stream": "stdout", "time": "2026-03-26T18:29:57.160400567Z"}
+{"log": "POST /api/v1/events 202 23ms\n", "stream": "stdout", "time": "2026-03-26T05:55:36.616207567Z"}
+{"log": "INFO  [scheduled-task] c.e.api.jobs.ReportJob - exported rows=462, file=report_9.csv\n", "stream": "stdout", "time": "2026-03-26T04:13:12.939912567Z"}
+{"log": "GET /api/v1/heartbeat 204 5ms\n", "stream": "stdout", "time": "2026-03-26T03:35:14.573607567Z"}
+{"log": "INFO  [pool-2-thread-1] c.e.api.cache.RedisClient - cache warm-up complete, keys=7910\n", "stream": "stdout", "time": "2026-03-27T23:45:11.931478567Z"}
+{"log": "ERROR [http-nio-8080-exec-9] c.e.api.pay.PaymentClient - gateway timeout after 12331ms\n", "stream": "stderr", "time": "2026-03-27T07:28:23.831743567Z"}
+{"log": "DEBUG [http-nio-8080-exec-7] c.e.api.web.RequestTrace - rid=3b04 method=GET path=/api/v1/orders ms=65\n", "stream": "stdout", "time": "2026-03-27T03:53:35.503782567Z"}
+{"log": "POST /api/v1/events 202 24ms\n", "stream": "stdout", "time": "2026-03-27T00:07:25.326623567Z"}
+{"log": "POST /api/v1/events 202 21ms\n", "stream": "stdout", "time": "2026-03-27T17:31:06.782312567Z"}
+{"log": "GET /api/v1/heartbeat 204 1ms\n", "stream": "stdout", "time": "2026-03-27T14:35:50.353847567Z"}
+{"log": "2026-03-27T09:18:44.112Z INFO  [main] com.example.api.Bootstrap - health check OK\n", "stream": "stdout", "time": "2026-03-27T09:18:44.112304567Z"}
