@@ -1,5 +1,6 @@
 {
   "python.analysis.extraPaths": ["${workspaceFolder}/backend"],
   "files.insertFinalNewline": true,
-  "files.trimTrailingWhitespace": true
+  "files.trimTrailingWhitespace": true,
+  "specstory.cloudSync.enabled": "always"
 }
