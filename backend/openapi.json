@@ -15,7 +15,7 @@
     "/api/logs": {
       "get": {
         "summary": "List log files",
-        "description": "Returns sorted filenames in the configured log directory.",
+        "description": "Returns sorted log entries in the configured log directory. Each item includes `name`, `issues` (`error` / `warning` when the corresponding counts are positive), `error_count` and `warning_count` from the same sampled scan (approximate for large files).",
         "operationId": "listLogs",
         "responses": {
           "200": {
@@ -29,10 +29,112 @@
                     "root": { "type": "string", "description": "Absolute path to log directory" },
                     "files": {
                       "type": "array",
-                      "items": { "type": "string" }
+                      "items": {
+                        "type": "object",
+                        "required": ["name", "issues", "error_count", "warning_count"],
+                        "properties": {
+                          "name": { "type": "string", "description": "File name under the log root" },
+                          "issues": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "enum": ["error", "warning"]
+                            },
+                            "description": "Present when the sample had matches for that severity"
+                          },
+                          "error_count": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Occurrences of error-level heuristic in sample"
+                          },
+                          "warning_count": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "description": "Occurrences of warning heuristic in sample"
+                          }
+                        }
+                      }
                     }
                   }
                 }
+              }
+            }
+          },
+          "500": {
+            "description": "Log root missing or not a directory",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/logs/hourly-summary": {
+      "get": {
+        "summary": "Per-file hourly health for a day and trailing 24-day window",
+        "description": "Single pass per file: (1) hours 0–23 for `date`; (2) 24 calendar days in `days24` with index 23 = `date`, 22 = previous day, …, 0 = oldest. Each slot is `empty`, `ok`, `warning`, `error`, or `error_warning` (both heuristics matched in that slot; UI may show a diagonal split).",
+        "operationId": "hourlySummary",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+            "description": "Calendar day in the viewer's local timezone (typically “today”)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Date key and per-file hour arrays",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["date", "recent_days", "files"],
+                  "properties": {
+                    "date": { "type": "string", "description": "Echo of the requested YYYY-MM-DD (newest day = `days24` index 23)" },
+                    "recent_days": { "type": "integer", "const": 24, "description": "Length of each `days24` array" },
+                    "files": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["name", "hours", "days24"],
+                        "properties": {
+                          "name": { "type": "string" },
+                          "hours": {
+                            "type": "array",
+                            "minItems": 24,
+                            "maxItems": 24,
+                            "items": {
+                              "type": "string",
+                              "enum": ["empty", "ok", "warning", "error", "error_warning"]
+                            }
+                          },
+                          "days24": {
+                            "type": "array",
+                            "minItems": 24,
+                            "maxItems": 24,
+                            "items": {
+                              "type": "string",
+                              "enum": ["empty", "ok", "warning", "error", "error_warning"]
+                            },
+                            "description": "Index 23 = `date`; 22 = previous calendar day; 0 = 23 days before `date`"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing `date`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
               }
             }
           },

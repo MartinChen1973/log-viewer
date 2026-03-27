@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>log-viewer</title>
+    <title>Log viewer — file</title>
     <script>
       (function () {
         var k = "log-viewer-theme";
@@ -26,12 +26,15 @@
     />
     <link rel="stylesheet" href="css/main.css" />
   </head>
-  <body>
-    <header class="app-header">
+  <body class="page-view">
+    <header class="app-header app-header--view">
       <div class="app-header__top">
         <div class="app-header__brand">
-          <h1>Log viewer</h1>
-          <p class="meta" id="log-root" hidden></p>
+          <div class="view-header-row">
+            <a class="back-link" href="index.html">← Back to list</a>
+            <h1 class="view-title" id="view-title">Log file</h1>
+          </div>
+          <p class="meta" id="file-meta" hidden></p>
         </div>
         <div class="theme-switcher" role="group" aria-label="Color theme">
           <button
@@ -61,44 +64,11 @@
         </div>
       </div>
     </header>
-    <main class="layout layout-index">
-      <aside class="sidebar sidebar-wide">
-        <h2 class="sidebar-title">Log files</h2>
-        <div class="legend-block" id="legend" hidden>
-          <p class="hint legend-hint">
-            <span class="legend-item"
-              ><span class="issue-badge issue-badge--error" role="img" aria-label="Errors"
-                >🚨</span
-              >
-              errors (count)</span
-            >
-            <span class="legend-item"
-              ><span class="issue-badge issue-badge--warning" role="img" aria-label="Warnings"
-                >⚠️</span
-              >
-              warnings (count)</span
-            >
-          </p>
-        </div>
-        <ul class="log-list" id="log-list" aria-label="Log files"></ul>
-        <p class="hint empty-hint" id="list-empty" hidden>
-          No log files in this directory.
-        </p>
-      </aside>
-      <section class="timeline-pane" aria-label="Log timeline">
-        <header class="timeline-header">
-          <h2 class="timeline-title" id="timeline-title">Timeline</h2>
-          <p class="timeline-meta" id="timeline-meta" hidden></p>
-        </header>
-        <p class="timeline-placeholder" id="timeline-placeholder">
-          Select a log file in the list to preview its timeline here. Newest
-          lines appear at the top.
-        </p>
-        <div class="timeline-chart" id="timeline-chart" hidden></div>
-      </section>
+    <main class="viewer viewer-full">
+      <pre id="log-content" class="log-content" aria-live="polite">Loading…</pre>
     </main>
     <p class="error" id="error-banner" hidden role="alert"></p>
     <script src="js/theme.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/view.js"></script>
   </body>
 </html>
