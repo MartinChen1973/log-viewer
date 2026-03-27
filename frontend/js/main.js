@@ -11,6 +11,54 @@
 
   let selectedItemEl = null;
 
+  function clearPickedMicroCellsExceptRow(keepRow) {
+    if (!listEl) return;
+    listEl.querySelectorAll(".log-list__hourly-cell--picked").forEach(
+      function (el) {
+        const r = el.closest(".log-list__item");
+        if (!keepRow) {
+          el.classList.remove("log-list__hourly-cell--picked");
+        } else if (r && r !== keepRow) {
+          el.classList.remove("log-list__hourly-cell--picked");
+        }
+      },
+    );
+  }
+
+  function clearPickedMicroCellsInRow(row) {
+    if (!row) return;
+    row.querySelectorAll(".log-list__hourly-cell--picked").forEach(function (el) {
+      el.classList.remove("log-list__hourly-cell--picked");
+    });
+  }
+
+  function markPickedDayDrill(dayCell) {
+    if (!dayCell) return;
+    const row = dayCell.closest(".log-list__item");
+    if (!row) return;
+    clearPickedMicroCellsExceptRow(row);
+    clearPickedMicroCellsInRow(row);
+    dayCell.classList.add("log-list__hourly-cell--picked");
+  }
+
+  function markPickedHourDrill(hourCell, todayYmd) {
+    if (!hourCell) return;
+    const row = hourCell.closest(".log-list__item");
+    if (!row) return;
+    clearPickedMicroCellsExceptRow(row);
+    clearPickedMicroCellsInRow(row);
+    hourCell.classList.add("log-list__hourly-cell--picked");
+    const y = String(todayYmd).replace(/"/g, "");
+    const todayDay = row.querySelector(
+      '.log-list__hourly--recent .log-list__hourly-blocks [data-drill-ymd="' +
+        y +
+        '"]',
+    );
+    if (todayDay) {
+      todayDay.classList.add("log-list__hourly-cell--picked");
+    }
+  }
+
   function showError(msg) {
     errorEl.textContent = msg;
     errorEl.hidden = !msg;
@@ -142,13 +190,13 @@
     );
   }
 
-  function buildTodayHourStrip(hours, currentHour, dateLabel) {
+  function buildTodayHourStrip(hours, currentHour, dateLabel, drillCtx) {
     const wrap = document.createElement("div");
     wrap.className = "log-list__hourly";
     wrap.title =
       "Local calendar day " +
       dateLabel +
-      ": hourly log health (error / warning / normal)";
+      ": hourly log health. Click an hour to scroll the timeline to that time on this day.";
     const rowBlocks = document.createElement("div");
     rowBlocks.className =
       "log-list__hourly-row log-list__hourly-row--blocks";
@@ -179,6 +227,41 @@
         cell.classList.add("log-list__hourly-cell--now");
       }
       cell.title = pad2(h) + ":00 — " + (labelBy[kind] || kind);
+      if (
+        drillCtx &&
+        drillCtx.logName &&
+        drillCtx.itemLi &&
+        drillCtx.todayYmd
+      ) {
+        cell.classList.add("log-list__hourly-cell--drill");
+        cell.setAttribute("role", "button");
+        cell.setAttribute("tabindex", "0");
+        cell.setAttribute(
+          "aria-label",
+          "Scroll timeline to " +
+            dateLabel +
+            " " +
+            pad2(h) +
+            ":00 for " +
+            drillCtx.logName,
+        );
+        const logName = drillCtx.logName;
+        const rowLi = drillCtx.itemLi;
+        const ymd = drillCtx.todayYmd;
+        const hour = h;
+        cell.addEventListener("click", function (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          void drillTimelineToTodayHour(logName, ymd, hour, rowLi, cell);
+        });
+        cell.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            ev.stopPropagation();
+            void drillTimelineToTodayHour(logName, ymd, hour, rowLi, cell);
+          }
+        });
+      }
       blocks.appendChild(cell);
     }
     rowBlocks.appendChild(clock);
@@ -208,13 +291,13 @@
     );
   }
 
-  function buildRecentDaysStrip(days24, endYmd) {
+  function buildRecentDaysStrip(days24, endYmd, drillCtx) {
     const wrap = document.createElement("div");
     wrap.className = "log-list__hourly log-list__hourly--recent";
     wrap.title =
       "Last 24 calendar days ending " +
       endYmd +
-      " (right = most recent day): daily log health";
+      " (right = most recent day): daily log health. Click a day to scroll the timeline.";
     const rowBlocks = document.createElement("div");
     rowBlocks.className =
       "log-list__hourly-row log-list__hourly-row--blocks";
@@ -238,6 +321,7 @@
         "log-list__hourly-cell log-list__hourly-cell--" + kind;
       const dayOffsetFromEnd = 23 - i;
       const slotDate = dateAtOffsetFromEndYmd(endYmd, dayOffsetFromEnd);
+      const ymd = ymdFromLocalDate(slotDate);
       const isTodaySlot = i === 23;
       if (slotDate.getDay() === 1 && !isTodaySlot) {
         cell.classList.add("log-list__hourly-cell--label");
@@ -248,8 +332,31 @@
         cell.textContent = String(slotDate.getDate());
         cell.classList.add("log-list__hourly-cell--now");
       }
-      cell.title =
-        ymdFromLocalDate(slotDate) + " — " + (labelBy[kind] || kind);
+      cell.title = ymd + " — " + (labelBy[kind] || kind);
+      if (drillCtx && drillCtx.logName && drillCtx.itemLi) {
+        cell.dataset.drillYmd = ymd;
+        cell.classList.add("log-list__hourly-cell--drill");
+        cell.setAttribute("role", "button");
+        cell.setAttribute("tabindex", "0");
+        cell.setAttribute(
+          "aria-label",
+          "Scroll timeline to " + ymd + " for " + drillCtx.logName,
+        );
+        const logName = drillCtx.logName;
+        const rowLi = drillCtx.itemLi;
+        cell.addEventListener("click", function (ev) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          void drillTimelineToDate(logName, ymd, rowLi, cell);
+        });
+        cell.addEventListener("keydown", function (ev) {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            ev.stopPropagation();
+            void drillTimelineToDate(logName, ymd, rowLi, cell);
+          }
+        });
+      }
       blocks.appendChild(cell);
     }
     rowBlocks.appendChild(cal);
@@ -906,6 +1013,7 @@
       const headerLi = document.createElement("li");
       headerLi.className = "timeline-day-header";
       headerLi.setAttribute("role", "presentation");
+      headerLi.dataset.timelineDay = group.key ? group.key : "__nodate__";
       let titleZh;
       if (!group.key) {
         titleZh = "无日期";
@@ -993,6 +1101,14 @@
           cls = "timeline-item timeline-item--nodate";
         }
         li.className = cls;
+        if (
+          ev.dateObj &&
+          !isNaN(ev.dateObj.getTime()) &&
+          ev.key
+        ) {
+          li.dataset.timelineYmd = ymdFromLocalDate(ev.dateObj);
+          li.dataset.timelineHour = String(ev.dateObj.getHours());
+        }
 
         const marker = document.createElement("span");
         marker.className = "timeline-item__emoji";
@@ -1034,6 +1150,7 @@
 
   async function selectLogForTimeline(name, itemEl) {
     if (!name) return;
+    clearPickedMicroCellsExceptRow(itemEl);
     if (selectedItemEl && selectedItemEl !== itemEl) {
       selectedItemEl.classList.remove("log-list__item--active");
     }
@@ -1053,6 +1170,65 @@
       p.textContent = "Failed to load log: " + e.message;
       timelineChartEl.appendChild(p);
       showError("");
+      throw e;
+    }
+  }
+
+  function scrollTimelineToDayKey(ymd) {
+    const root = timelineChartEl;
+    if (!root || root.hidden) return;
+    const sel = '[data-timeline-day="' + String(ymd).replace(/"/g, "") + '"]';
+    const target = root.querySelector(sel);
+    if (!target) return;
+    target.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+
+  function scrollTimelineToDayHour(ymd, hour) {
+    const root = timelineChartEl;
+    if (!root || root.hidden) return;
+    const y = String(ymd).replace(/"/g, "");
+    const h = String(hour);
+    const target = root.querySelector(
+      '.timeline-item[data-timeline-ymd="' +
+        y +
+        '"][data-timeline-hour="' +
+        h +
+        '"]',
+    );
+    if (target) {
+      target.scrollIntoView({ block: "start", behavior: "smooth" });
+      return;
+    }
+    scrollTimelineToDayKey(ymd);
+  }
+
+  async function drillTimelineToDate(name, ymd, itemLi, pickedCell) {
+    markPickedDayDrill(pickedCell);
+    try {
+      const needLoad = selectedItemEl !== itemLi;
+      if (needLoad) {
+        await selectLogForTimeline(name, itemLi);
+      }
+      requestAnimationFrame(function () {
+        scrollTimelineToDayKey(ymd);
+      });
+    } catch (e) {
+      /* ⬅️ Error banner already shown by selectLogForTimeline */
+    }
+  }
+
+  async function drillTimelineToTodayHour(name, ymd, hour, itemLi, pickedCell) {
+    markPickedHourDrill(pickedCell, ymd);
+    try {
+      const needLoad = selectedItemEl !== itemLi;
+      if (needLoad) {
+        await selectLogForTimeline(name, itemLi);
+      }
+      requestAnimationFrame(function () {
+        scrollTimelineToDayHour(ymd, hour);
+      });
+    } catch (e) {
+      /* ⬅️ Error banner already shown by selectLogForTimeline */
     }
   }
 
@@ -1175,28 +1351,50 @@
           Array.isArray(health.days24) &&
           health.days24.length === 24;
 
+        const hourDrillCtx = {
+          logName: name,
+          itemLi: li,
+          todayYmd: todayYmd,
+        };
         if (hoursOk) {
           col.appendChild(
-            buildTodayHourStrip(health.hours, nowHour, todayYmd),
+            buildTodayHourStrip(
+              health.hours,
+              nowHour,
+              todayYmd,
+              hourDrillCtx,
+            ),
           );
         } else {
           const emptyHrs = [];
           for (let z = 0; z < 24; z++) {
             emptyHrs.push("empty");
           }
-          const strip = buildTodayHourStrip(emptyHrs, nowHour, todayYmd);
+          const strip = buildTodayHourStrip(
+            emptyHrs,
+            nowHour,
+            todayYmd,
+            hourDrillCtx,
+          );
           strip.classList.add("log-list__hourly--unavailable");
           col.appendChild(strip);
         }
 
+        const dayDrillCtx = { logName: name, itemLi: li };
         if (daysOk) {
-          col.appendChild(buildRecentDaysStrip(health.days24, todayYmd));
+          col.appendChild(
+            buildRecentDaysStrip(health.days24, todayYmd, dayDrillCtx),
+          );
         } else {
           const emptyDays = [];
           for (let z = 0; z < 24; z++) {
             emptyDays.push("empty");
           }
-          const dStrip = buildRecentDaysStrip(emptyDays, todayYmd);
+          const dStrip = buildRecentDaysStrip(
+            emptyDays,
+            todayYmd,
+            dayDrillCtx,
+          );
           dStrip.classList.add("log-list__hourly--unavailable");
           col.appendChild(dStrip);
         }

@@ -264,7 +264,38 @@ body.page-view {
   grid-template-columns: minmax(280px, 380px) 1fr;
 }
 
+/* ⬇️ Index: fill viewport so sidebar and timeline scroll inside their panes, not the window. */
+body:has(> main.layout-index) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+body:has(> main.layout-index) > main.layout {
+  flex: 1;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+body:has(> main.layout-index) > main.layout > .sidebar-wide,
+body:has(> main.layout-index) > main.layout > .timeline-pane {
+  min-height: 0;
+}
+
 @media (max-width: 720px) {
+  body:has(> main.layout-index) {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  body:has(> main.layout-index) > main.layout {
+    flex: none;
+    min-height: calc(100vh - 5rem);
+  }
+
   .layout,
   .layout-index {
     grid-template-columns: 1fr;
@@ -278,7 +309,6 @@ body.page-view {
 }
 
 .sidebar-wide {
-  max-height: calc(100vh - 5rem);
   overflow: auto;
 }
 
@@ -393,6 +423,29 @@ body.page-view {
   box-shadow: 0 0 0 1px var(--hourly-now-ring);
   z-index: 1;
   position: relative;
+}
+
+/* ⬇️ Recent-days micro-report: drill opens timeline and scrolls to that calendar day. */
+.log-list__hourly-cell--drill {
+  cursor: pointer;
+}
+
+.log-list__hourly-cell--drill:hover {
+  filter: brightness(0.96);
+}
+
+.log-list__hourly-cell--drill:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  z-index: 2;
+  position: relative;
+}
+
+/* ⬇️ Last-drilled day or hour in the micro-report strips (red frame). */
+.log-list__hourly-cell--picked {
+  z-index: 3;
+  position: relative;
+  box-shadow: 0 0 0 2px var(--error);
 }
 
 .log-list__item--active .log-list__main {
@@ -565,9 +618,14 @@ body.page-view {
   padding: 1.25rem 0.75rem 1.5rem;
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 5rem);
+  min-height: 0;
   min-width: 0;
+  overflow: hidden;
   background: var(--bg);
+}
+
+body:not(:has(> main.layout-index)) .timeline-pane {
+  min-height: calc(100vh - 5rem);
 }
 
 .timeline-header {
@@ -600,12 +658,16 @@ body.page-view {
 
 .timeline-chart {
   flex: 1;
-  min-height: 12rem;
+  min-height: 0;
   overflow: auto;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow-card);
+}
+
+body:not(:has(> main.layout-index)) .timeline-chart {
+  min-height: 12rem;
 }
 
 .timeline-loading,
