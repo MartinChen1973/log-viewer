@@ -5,7 +5,7 @@ import os
 import re
 import urllib.error
 import urllib.request
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Literal, Optional, Tuple
 
@@ -26,6 +26,7 @@ from log_analysis.window import (
     approx_tokens_from_bytes,
     preset_stats_for_capped_text,
     slice_for_preset,
+    window_bounds,
 )
 from paths import get_log_root
 _FRONTEND_DIR = _REPO_ROOT / "frontend"
@@ -431,6 +432,8 @@ def analyze_history_detail(entry_id: str):
     usage_items = row.get("usage_items")
     if not isinstance(usage_items, list):
         usage_items = []
+    rs = row.get("range_date_start")
+    re_ = row.get("range_date_end")
     return jsonify(
         {
             "id": row.get("id"),
@@ -440,6 +443,8 @@ def analyze_history_detail(entry_id: str):
             "preset_label": row.get("preset_label"),
             "profile": row.get("profile"),
             "approx_tokens": row.get("approx_tokens"),
+            "range_date_start": rs if isinstance(rs, str) else None,
+            "range_date_end": re_ if isinstance(re_, str) else None,
             "analysis": analysis,
             "usage_items": usage_items,
         }
@@ -529,7 +534,11 @@ def analyze_log(name: str):
         text, size, truncated = _read_log_text_capped(path)
     except OSError as e:
         return jsonify({"error": str(e)}), 500
-    content = slice_for_preset(text, preset)
+    now = datetime.now()
+    content = slice_for_preset(text, preset, now)
+    win_a, win_b = window_bounds(preset, now)
+    range_date_start = win_a.date().isoformat()
+    range_date_end = win_b.date().isoformat()
     byte_len = len(content.encode("utf-8"))
     approx_tok = approx_tokens_from_bytes(byte_len)
     profile = resolve_profile(path.name)
@@ -562,6 +571,8 @@ def analyze_log(name: str):
                     "preset": preset,
                     "approx_tokens": approx_tok,
                     "profile": profile,
+                    "range_date_start": range_date_start,
+                    "range_date_end": range_date_end,
                     "ai_error": err_body or e.reason,
                     "source_truncated": truncated,
                 }
@@ -576,6 +587,8 @@ def analyze_log(name: str):
                     "preset": preset,
                     "approx_tokens": approx_tok,
                     "profile": profile,
+                    "range_date_start": range_date_start,
+                    "range_date_end": range_date_end,
                     "ai_error": str(e.reason) if e.reason else str(e),
                     "source_truncated": truncated,
                 }
@@ -595,6 +608,8 @@ def analyze_log(name: str):
         preset_label=preset_label,
         profile=profile,
         approx_tokens=approx_tok,
+        range_date_start=range_date_start,
+        range_date_end=range_date_end,
         analysis=analysis,
         usage_items=usage_items,
     )
@@ -604,6 +619,8 @@ def analyze_log(name: str):
             "preset": preset,
             "approx_tokens": approx_tok,
             "profile": profile,
+            "range_date_start": range_date_start,
+            "range_date_end": range_date_end,
             "ai_error": None,
             "source_truncated": truncated,
             "usage_items": usage_items,

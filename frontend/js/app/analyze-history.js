@@ -11,56 +11,177 @@ const PATH_DETAIL = "/api/logs/analyze-history/";
 const detailCache = new Map();
 
 /**
+ * Final estimated CNY for the list title (右对齐): `¥` + 3 decimals, or em dash.
  * @param {Record<string, unknown>} totals
  * @returns {string}
  */
-function formatTotalsSummaryLine(totals) {
+function formatFinalPriceTitle(totals) {
   if (!totals || typeof totals !== "object") {
-    return "";
+    return "—";
   }
-  const has = Boolean(totals.has_agent_steps);
   const counted = Number(totals.counted_agent) || 0;
-  if (!has || counted < 1) {
-    return "合计：—（无智能体用量明细）";
-  }
-  const sumIn = Number(totals.sum_in) || 0;
-  const sumOut = Number(totals.sum_out) || 0;
-  const sumTot = Number(totals.sum_tot) || 0;
-  const sumCost = Number(totals.sum_cost_usd);
   const sumEst = Number(totals.sum_est_cny);
-  const pin = totals.catalog_in_cny_per_m;
-  const pout = totals.catalog_out_cny_per_m;
-  const fmtUsd = (n) =>
-    typeof n === "number" && Number.isFinite(n) ? "$" + n.toFixed(6) : "-";
-  const fmtCny = (n) =>
-    typeof n === "number" && Number.isFinite(n) ? "¥" + n.toFixed(6) : "-";
-  const fmtM = (n) =>
-    typeof n === "number" && Number.isFinite(n) ? String(n) : "-";
-  const colIn = sumIn > 0 ? String(sumIn) : "-";
-  const colOut = sumOut > 0 ? String(sumOut) : "-";
-  const colTot = sumTot > 0 ? String(sumTot) : "-";
-  const colCost =
-    counted > 0 && sumCost > 0 ? fmtUsd(sumCost) : "-";
-  const colPin = pin != null ? fmtM(pin) : "-";
-  const colPout = pout != null ? fmtM(pout) : "-";
-  const colEst =
-    counted > 0 && sumEst > 0 ? fmtCny(sumEst) : "-";
+  if (!totals.has_agent_steps || counted < 1) {
+    return "—";
+  }
+  if (!Number.isFinite(sumEst) || sumEst <= 0) {
+    return "—";
+  }
+  return "¥" + sumEst.toFixed(3);
+}
+
+/**
+ * @param {number | null | undefined} n
+ * @returns {string}
+ */
+function fmtCny3(n) {
+  if (n == null || typeof n !== "number" || !Number.isFinite(n) || n <= 0) {
+    return "—";
+  }
+  return "¥" + n.toFixed(3);
+}
+
+/**
+ * @param {string | undefined} s
+ * @param {string | undefined} e
+ * @returns {boolean}
+ */
+function hasDateRange(s, e) {
   return (
-    "合计（智能体行）：输入 " +
-    colIn +
-    " · 输出 " +
-    colOut +
-    " · 总计 " +
-    colTot +
-    " · 费用 " +
-    colCost +
-    " · 入¥/M " +
-    colPin +
-    " · 出¥/M " +
-    colPout +
-    " · 预估 " +
-    colEst
+    typeof s === "string" &&
+    s.length > 0 &&
+    typeof e === "string" &&
+    e.length > 0
   );
+}
+
+/**
+ * Structured metrics: intro line + 4-column table (计数项 / 输入 / 输出 / 总计).
+ * @param {Record<string, unknown>} totals
+ * @param {number | null} approxTokens
+ * @param {string | undefined} rangeDateStart
+ * @param {string | undefined} rangeDateEnd
+ * @returns {HTMLElement}
+ */
+function buildTotalsParamsEl(
+  totals,
+  approxTokens,
+  rangeDateStart,
+  rangeDateEnd,
+) {
+  const wrap = document.createElement("div");
+  wrap.className = "analyze-history-list__params";
+
+  const t = totals && typeof totals === "object" ? totals : {};
+  const has = Boolean(t.has_agent_steps);
+  const counted = Number(t.counted_agent) || 0;
+
+  if (approxTokens != null && Number.isFinite(approxTokens)) {
+    const intro = document.createElement("div");
+    intro.className = "analyze-history-list__metric-intro";
+    if (hasDateRange(rangeDateStart, rangeDateEnd)) {
+      intro.textContent =
+        rangeDateStart +
+        "~" +
+        rangeDateEnd +
+        " 约" +
+        String(approxTokens) +
+        "tok";
+    } else {
+      intro.textContent = "所选日志片段 约 " + String(approxTokens) + " tok";
+    }
+    wrap.appendChild(intro);
+  }
+
+  if (!has || counted < 1) {
+    const row = document.createElement("div");
+    row.className = "analyze-history-list__param-line--muted";
+    row.textContent = "无智能体用量明细";
+    wrap.appendChild(row);
+    return wrap;
+  }
+
+  const sumIn = Number(t.sum_in) || 0;
+  const sumOut = Number(t.sum_out) || 0;
+  const sumTot = Number(t.sum_tot) || 0;
+  const sumEstAll = Number(t.sum_est_cny);
+  const pin =
+    typeof t.catalog_in_cny_per_m === "number"
+      ? t.catalog_in_cny_per_m
+      : null;
+  const pout =
+    typeof t.catalog_out_cny_per_m === "number"
+      ? t.catalog_out_cny_per_m
+      : null;
+
+  const estIn =
+    pin != null && sumIn > 0 ? (sumIn / 1e6) * pin : null;
+  const estOut =
+    pout != null && sumOut > 0 ? (sumOut / 1e6) * pout : null;
+  let estGrand = null;
+  if (Number.isFinite(sumEstAll) && sumEstAll > 0) {
+    estGrand = sumEstAll;
+  } else if (
+    estIn != null &&
+    estOut != null &&
+    Number.isFinite(estIn) &&
+    Number.isFinite(estOut)
+  ) {
+    estGrand = estIn + estOut;
+  } else if (estIn != null && Number.isFinite(estIn)) {
+    estGrand = estIn;
+  } else if (estOut != null && Number.isFinite(estOut)) {
+    estGrand = estOut;
+  }
+
+  const table = document.createElement("div");
+  table.className = "analyze-history-list__metric-table";
+
+  function addRow(rowClass, cells) {
+    const row = document.createElement("div");
+    row.className = ["analyze-history-list__metric-row", rowClass]
+      .filter(Boolean)
+      .join(" ");
+    for (let i = 0; i < cells.length; i++) {
+      const cell = document.createElement("span");
+      cell.className = "analyze-history-list__metric-cell";
+      cell.textContent = cells[i];
+      row.appendChild(cell);
+    }
+    table.appendChild(row);
+  }
+
+  addRow("analyze-history-list__metric-row--head", [
+    "计数项",
+    "输入",
+    "输出",
+    "总计",
+  ]);
+  addRow("analyze-history-list__metric-row--tokens", [
+    "token",
+    sumIn > 0 ? String(sumIn) : "—",
+    sumOut > 0 ? String(sumOut) : "—",
+    sumTot > 0 ? String(sumTot) : "—",
+  ]);
+
+  const fmtUnit = (n) =>
+    typeof n === "number" && Number.isFinite(n) ? String(n) + "¥/M" : "—";
+  addRow("analyze-history-list__metric-row--unit", [
+    "单价",
+    fmtUnit(pin),
+    fmtUnit(pout),
+    "—",
+  ]);
+
+  addRow("analyze-history-list__metric-row--total-cn", [
+    "总价",
+    fmtCny3(estIn),
+    fmtCny3(estOut),
+    fmtCny3(estGrand),
+  ]);
+
+  wrap.appendChild(table);
+  return wrap;
 }
 
 /**
@@ -108,6 +229,15 @@ function renderDetail(bodyEl, footEl, metaEl, out) {
       typeof data.preset_label === "string"
         ? data.preset_label
         : String(data.preset || "");
+    const rs = data.range_date_start;
+    const re = data.range_date_end;
+    const rangeSeg =
+      hasDateRange(
+        typeof rs === "string" ? rs : "",
+        typeof re === "string" ? re : "",
+      )
+        ? rs + "~" + re
+        : "";
     const when = formatWhen(
       typeof data.created_at === "string" ? data.created_at : "",
     );
@@ -115,6 +245,7 @@ function renderDetail(bodyEl, footEl, metaEl, out) {
       logName +
       " · " +
       (presetLabel || "—") +
+      (rangeSeg ? " · " + rangeSeg : "") +
       (when ? " · " + when : "");
   }
   const raw =
@@ -249,8 +380,10 @@ export function initAnalyzeHistoryPage() {
         li.setAttribute("tabindex", "0");
         li.dataset.id = id;
 
-        const line1 = document.createElement("div");
-        line1.className = "analyze-history-list__line1";
+        const titleRow = document.createElement("div");
+        titleRow.className = "analyze-history-list__title-row";
+        const titleMain = document.createElement("div");
+        titleMain.className = "analyze-history-list__title-text";
         const logName =
           typeof e.log_name === "string" ? e.log_name : "—";
         const presetLabel =
@@ -260,27 +393,40 @@ export function initAnalyzeHistoryPage() {
         const when = formatWhen(
           typeof e.created_at === "string" ? e.created_at : "",
         );
-        line1.textContent =
+        titleMain.textContent =
           logName +
           " · " +
           (presetLabel || "—") +
           (when ? " · " + when : "");
 
-        const line2 = document.createElement("div");
-        line2.className = "analyze-history-list__line2";
-        const tok =
-          e.approx_tokens != null ? Number(e.approx_tokens) : null;
-        const tokBit =
-          tok != null && Number.isFinite(tok)
-            ? "片段约 " + String(tok) + " tok"
-            : "";
-        const totLine = formatTotalsSummaryLine(
+        const priceEl = document.createElement("span");
+        priceEl.className = "analyze-history-list__price";
+        priceEl.setAttribute(
+          "title",
+          "预估费用 (¥，AGICTO 目录价)",
+        );
+        priceEl.textContent = formatFinalPriceTitle(
           e.totals && typeof e.totals === "object" ? e.totals : {},
         );
-        line2.textContent = (tokBit ? tokBit + " · " : "") + totLine;
 
-        li.appendChild(line1);
-        li.appendChild(line2);
+        titleRow.appendChild(titleMain);
+        titleRow.appendChild(priceEl);
+
+        const tok =
+          e.approx_tokens != null ? Number(e.approx_tokens) : null;
+        const rs =
+          typeof e.range_date_start === "string" ? e.range_date_start : "";
+        const re =
+          typeof e.range_date_end === "string" ? e.range_date_end : "";
+        const paramsEl = buildTotalsParamsEl(
+          e.totals && typeof e.totals === "object" ? e.totals : {},
+          tok,
+          rs,
+          re,
+        );
+
+        li.appendChild(titleRow);
+        li.appendChild(paramsEl);
 
         li.addEventListener("click", function () {
           activateEntry(id, li);

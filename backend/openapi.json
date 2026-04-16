@@ -310,12 +310,14 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "required": ["analysis", "preset", "approx_tokens", "profile", "ai_error", "source_truncated"],
+                  "required": ["analysis", "preset", "approx_tokens", "profile", "range_date_start", "range_date_end", "ai_error", "source_truncated"],
                   "properties": {
                     "analysis": { "type": "string" },
                     "preset": { "type": "string" },
                     "approx_tokens": { "type": "integer" },
                     "profile": { "type": "string" },
+                    "range_date_start": { "type": "string", "description": "Inclusive window start date (YYYY-MM-DD, local clock)" },
+                    "range_date_end": { "type": "string", "description": "Inclusive window end date (YYYY-MM-DD, local clock)" },
                     "ai_error": { "type": ["string", "null"] },
                     "source_truncated": { "type": "boolean" }
                   }

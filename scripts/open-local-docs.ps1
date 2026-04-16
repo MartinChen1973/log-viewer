@@ -1,5 +1,7 @@
 # Open local Swagger / app URLs (Edge/Chrome if found; else default browser per URL).
 param(
+    # ## ⬇️ After a window already exists, open each URL as a new tab (no --new-window) — e.g. AI API tab once uvicorn is ready.
+    [switch] $AppendTabs,
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]] $Urls
 )
@@ -69,8 +71,15 @@ function Open-UrlDefaultBrowser {
 $browser = Get-BrowserExe
 
 if ($browser) {
-    Write-Host "Opening $($Urls.Count) tab(s) via: $browser"
+    Write-Host "Opening $($Urls.Count) tab(s) via: $browser$(if ($AppendTabs) { ' (append to existing window)' })"
     try {
+        if ($AppendTabs) {
+            foreach ($u in $Urls) {
+                Start-Process -FilePath $browser -ArgumentList @($u) -ErrorAction Stop
+                Start-Sleep -Milliseconds 280
+            }
+            exit 0
+        }
         # First URL in a new window; remaining URLs open as new tabs in the same browser.
         $first = $Urls[0]
         [void](Start-Process -FilePath $browser -ArgumentList @("--new-window", $first) -PassThru -ErrorAction Stop)

@@ -135,6 +135,8 @@ def append_analysis_record(
     preset_label: str,
     profile: str,
     approx_tokens: int,
+    range_date_start: str,
+    range_date_end: str,
     analysis: str,
     usage_items: list[Any],
 ) -> str | None:
@@ -149,6 +151,8 @@ def append_analysis_record(
         "preset_label": preset_label,
         "profile": profile,
         "approx_tokens": int(approx_tokens),
+        "range_date_start": range_date_start,
+        "range_date_end": range_date_end,
         "usage_items": usage_items if isinstance(usage_items, list) else [],
         "analysis": analysis if isinstance(analysis, str) else "",
     }
@@ -187,6 +191,8 @@ def list_summaries_newest_first() -> list[dict[str, Any]]:
         if not isinstance(usage_items, list):
             usage_items = []
         totals = usage_totals_from_usage_items(usage_items)
+        rs = row.get("range_date_start")
+        re_ = row.get("range_date_end")
         out.append(
             {
                 "id": eid,
@@ -196,6 +202,8 @@ def list_summaries_newest_first() -> list[dict[str, Any]]:
                 "preset_label": row.get("preset_label"),
                 "profile": row.get("profile"),
                 "approx_tokens": row.get("approx_tokens"),
+                "range_date_start": rs if isinstance(rs, str) else None,
+                "range_date_end": re_ if isinstance(re_, str) else None,
                 "totals": totals,
             }
         )

@@ -114,28 +114,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\scripts\arrange-cons
 
 
 
-REM ## ⬇️ AI API blocks accept until lifespan finishes (MCP retries, model, SQLite); open browser only after /openapi.json responds
+REM ## ⬇️ Open MCP + Flask URLs immediately so the browser appears while AI API ^(8500^) is still starting (lifespan, MCP, SQLite, model).
 
-echo Waiting for AI API (8500) before opening docs tabs (can take up to ~120s while MCP/model/SQLite initialize^)...
+echo Opening MCP and Flask /docs in the browser — AI API tab after /openapi.json; log-viewer home ^(5000/^) opens last and stays active.
 
-echo Do not close this window until you see the browser message below, or tabs will never open.
-
-powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\scripts\wait-http-ready.ps1" -Url "http://127.0.0.1:8500/openapi.json" -Label "AI API (8500)" -MaxWaitSec 120
-
-if errorlevel 1 echo WARNING: AI API ^(8500^) did not respond in time; opening tabs anyway - refresh /docs when its console finishes startup.
-
-
-
-REM ## ⬇️ Use PowerShell Start-Process (registry + standard paths) - cmd start + msedge + multiple URLs is easy to mis-parse.
-
-echo Opening documentation tabs...
-
-powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\scripts\open-local-docs.ps1" "http://127.0.0.1:8500/docs" "http://127.0.0.1:28081/docs" "http://127.0.0.1:28082/docs" "http://127.0.0.1:28083/docs" "http://127.0.0.1:28084/docs" "http://127.0.0.1:5000/docs" "http://127.0.0.1:5000/"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\scripts\open-local-docs.ps1" "http://127.0.0.1:28081/docs" "http://127.0.0.1:28082/docs" "http://127.0.0.1:28083/docs" "http://127.0.0.1:28084/docs" "http://127.0.0.1:5000/docs"
 
 if errorlevel 1 (
-  echo WARNING: PowerShell open-local-docs failed; retrying with cmd start for each URL...
-  start "" "http://127.0.0.1:8500/docs"
-  ping -n 2 127.0.0.1 >nul
+  echo WARNING: open-local-docs ^(MCP/Flask^) failed; retrying with cmd start...
   start "" "http://127.0.0.1:28081/docs"
   ping -n 2 127.0.0.1 >nul
   start "" "http://127.0.0.1:28082/docs"
@@ -145,7 +131,39 @@ if errorlevel 1 (
   start "" "http://127.0.0.1:28084/docs"
   ping -n 2 127.0.0.1 >nul
   start "" "http://127.0.0.1:5000/docs"
-  ping -n 2 127.0.0.1 >nul
+)
+
+
+
+REM ## ⬇️ AI API blocks accept until lifespan finishes; then append /docs as a new tab in the same browser window.
+
+echo Waiting for AI API on port 8500 — up to ~120s while MCP, model, and SQLite initialize. You can use the other tabs meanwhile.
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\scripts\wait-http-ready.ps1" -Url "http://127.0.0.1:8500/openapi.json" -Label "AI API (8500)" -MaxWaitSec 120
+
+if errorlevel 1 echo WARNING: AI API ^(8500^) did not respond in time — open or refresh http://127.0.0.1:8500/docs when its console finishes startup.
+
+
+
+echo Adding AI API ^(8500^) docs tab...
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\scripts\open-local-docs.ps1" -AppendTabs "http://127.0.0.1:8500/docs"
+
+if errorlevel 1 (
+  echo WARNING: open-local-docs ^(AI API^) failed; retrying with cmd start...
+  start "" "http://127.0.0.1:8500/docs"
+)
+
+
+
+REM ## ⬇️ Open log-viewer home last so it is the rightmost tab and the focused tab (Chromium activates the last-opened URL).
+
+echo Opening log-viewer home ^(5000/^) as the active tab...
+
+powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT%\scripts\open-local-docs.ps1" -AppendTabs "http://127.0.0.1:5000/"
+
+if errorlevel 1 (
+  echo WARNING: open-local-docs ^(log-viewer home^) failed; retrying with cmd start...
   start "" "http://127.0.0.1:5000/"
 )
 
@@ -153,7 +171,7 @@ if errorlevel 1 (
 
 echo.
 
-echo One browser window should show seven tabs ^(8500 AI / 28081-28084 MCP / 5000 log-viewer^). Six service consoles should be running.
+echo One browser window should show seven tabs: MCP 28081-28084, Flask /docs, 8500 AI /docs when ready, then 5000 home ^(active^). Six service consoles should be running.
 
 echo Press any key to close this launcher window (servers keep running).
 
