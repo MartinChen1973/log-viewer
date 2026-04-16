@@ -80,6 +80,34 @@ function formatCostCell(n) {
 }
 
 /**
+ * @param {number | null | undefined} n
+ * @returns {string}
+ */
+function formatCnyCell(n) {
+  if (n == null || n === undefined) {
+    return "-";
+  }
+  if (typeof n !== "number" || !Number.isFinite(n)) {
+    return "-";
+  }
+  return "¥" + n.toFixed(6);
+}
+
+/**
+ * @param {number | null | undefined} n
+ * @returns {string}
+ */
+function formatCnyPerMCell(n) {
+  if (n == null || n === undefined) {
+    return "-";
+  }
+  if (typeof n !== "number" || !Number.isFinite(n)) {
+    return "-";
+  }
+  return String(n);
+}
+
+/**
  * @param {unknown} v
  * @returns {number | null}
  */
@@ -103,6 +131,9 @@ function coerceNumber(v) {
  *   input_tokens?: number | null;
  *   output_tokens?: number | null;
  *   cost_usd?: number | null;
+ *   price_input_cny_per_million?: number | null;
+ *   price_output_cny_per_million?: number | null;
+ *   estimated_cost_cny?: number | null;
  * }>} items
  */
 function renderUsageItemsFooter(footerEl, items) {
@@ -116,6 +147,12 @@ function renderUsageItemsFooter(footerEl, items) {
   title.className = "ai-analyze-result__usage-title";
   title.textContent = "调用与消耗（分步）";
   wrap.appendChild(title);
+
+  const hint = document.createElement("div");
+  hint.className = "ai-analyze-result__usage-hint";
+  hint.textContent =
+    "入¥/M、出¥/M、预估(¥) 来自 AGICTO 公开列表价（缓存于 ai-api/data/model_prices.yaml）；与供应商实付可能不一致。";
+  wrap.appendChild(hint);
 
   const table = document.createElement("table");
   table.className = "ai-analyze-result__usage-table";
@@ -132,6 +169,9 @@ function renderUsageItemsFooter(footerEl, items) {
     "输出",
     "总计",
     "费用 (USD)",
+    "入¥/M",
+    "出¥/M",
+    "预估 (¥)",
   ];
   for (let h = 0; h < headers.length; h++) {
     const th = document.createElement("th");
@@ -146,7 +186,10 @@ function renderUsageItemsFooter(footerEl, items) {
   let sumOut = 0;
   let sumTot = 0;
   let sumCost = 0;
+  let sumEstCny = 0;
   let countedAgent = 0;
+  let catalogIn = null;
+  let catalogOut = null;
 
   const tbody = document.createElement("tbody");
   for (let i = 0; i < items.length; i++) {
@@ -174,16 +217,34 @@ function renderUsageItemsFooter(footerEl, items) {
     tdTot.className = "ai-analyze-result__usage-col-metric";
     const tdCost = document.createElement("td");
     tdCost.className = "ai-analyze-result__usage-col-cost";
+    const tdPin = document.createElement("td");
+    tdPin.className = "ai-analyze-result__usage-col-metric ai-analyze-result__usage-col-agicto";
+    const tdPout = document.createElement("td");
+    tdPout.className = "ai-analyze-result__usage-col-metric ai-analyze-result__usage-col-agicto";
+    const tdEst = document.createElement("td");
+    tdEst.className = "ai-analyze-result__usage-col-metric ai-analyze-result__usage-col-cny-est";
 
     if (kind === "agent") {
       const inn = coerceNumber(row.input_tokens);
       const outt = coerceNumber(row.output_tokens);
       const tot = coerceNumber(row.tokens);
       const cost = coerceNumber(row.cost_usd);
+      const pin = coerceNumber(row.price_input_cny_per_million);
+      const pout = coerceNumber(row.price_output_cny_per_million);
+      const est = coerceNumber(row.estimated_cost_cny);
       tdIn.textContent = formatTokenCell(inn);
       tdOut.textContent = formatTokenCell(outt);
       tdTot.textContent = formatTokenCell(tot);
       tdCost.textContent = formatCostCell(cost);
+      tdPin.textContent = formatCnyPerMCell(pin);
+      tdPout.textContent = formatCnyPerMCell(pout);
+      tdEst.textContent = formatCnyCell(est);
+      if (catalogIn == null && pin != null) {
+        catalogIn = pin;
+      }
+      if (catalogOut == null && pout != null) {
+        catalogOut = pout;
+      }
       if (inn != null) {
         sumIn += inn;
       }
@@ -196,12 +257,18 @@ function renderUsageItemsFooter(footerEl, items) {
       if (cost != null) {
         sumCost += cost;
       }
+      if (est != null) {
+        sumEstCny += est;
+      }
       countedAgent += 1;
     } else {
       tdIn.textContent = "-";
       tdOut.textContent = "-";
       tdTot.textContent = "-";
       tdCost.textContent = "-";
+      tdPin.textContent = "-";
+      tdPout.textContent = "-";
+      tdEst.textContent = "-";
     }
 
     tr.appendChild(tdNum);
@@ -211,6 +278,9 @@ function renderUsageItemsFooter(footerEl, items) {
     tr.appendChild(tdOut);
     tr.appendChild(tdTot);
     tr.appendChild(tdCost);
+    tr.appendChild(tdPin);
+    tr.appendChild(tdPout);
+    tr.appendChild(tdEst);
     tbody.appendChild(tr);
   }
   table.appendChild(tbody);
@@ -242,12 +312,27 @@ function renderUsageItemsFooter(footerEl, items) {
     fCost.className = "ai-analyze-result__usage-col-cost";
     fCost.textContent =
       countedAgent > 0 && sumCost > 0 ? formatCostCell(sumCost) : "-";
+    const fPin = document.createElement("td");
+    fPin.className = "ai-analyze-result__usage-col-metric ai-analyze-result__usage-col-agicto";
+    fPin.textContent =
+      catalogIn != null ? formatCnyPerMCell(catalogIn) : "-";
+    const fPout = document.createElement("td");
+    fPout.className = "ai-analyze-result__usage-col-metric ai-analyze-result__usage-col-agicto";
+    fPout.textContent =
+      catalogOut != null ? formatCnyPerMCell(catalogOut) : "-";
+    const fEst = document.createElement("td");
+    fEst.className = "ai-analyze-result__usage-col-metric ai-analyze-result__usage-col-cny-est";
+    fEst.textContent =
+      countedAgent > 0 && sumEstCny > 0 ? formatCnyCell(sumEstCny) : "-";
 
     footTr.appendChild(tdLabel);
     footTr.appendChild(fIn);
     footTr.appendChild(fOut);
     footTr.appendChild(fTot);
     footTr.appendChild(fCost);
+    footTr.appendChild(fPin);
+    footTr.appendChild(fPout);
+    footTr.appendChild(fEst);
     tfoot.appendChild(footTr);
     table.appendChild(tfoot);
   }
@@ -295,6 +380,24 @@ function normalizeUsageItems(raw) {
       const n = Number(cost_usd);
       cost_usd = Number.isFinite(n) ? n : null;
     }
+    let price_input_cny_per_million = o.price_input_cny_per_million;
+    if (price_input_cny_per_million != null && typeof price_input_cny_per_million !== "number") {
+      const n = Number(price_input_cny_per_million);
+      price_input_cny_per_million = Number.isFinite(n) ? n : null;
+    }
+    let price_output_cny_per_million = o.price_output_cny_per_million;
+    if (
+      price_output_cny_per_million != null &&
+      typeof price_output_cny_per_million !== "number"
+    ) {
+      const n = Number(price_output_cny_per_million);
+      price_output_cny_per_million = Number.isFinite(n) ? n : null;
+    }
+    let estimated_cost_cny = o.estimated_cost_cny;
+    if (estimated_cost_cny != null && typeof estimated_cost_cny !== "number") {
+      const n = Number(estimated_cost_cny);
+      estimated_cost_cny = Number.isFinite(n) ? n : null;
+    }
     out.push({
       kind,
       name,
@@ -302,6 +405,9 @@ function normalizeUsageItems(raw) {
       input_tokens,
       output_tokens,
       cost_usd,
+      price_input_cny_per_million,
+      price_output_cny_per_million,
+      estimated_cost_cny,
     });
   }
   return out;

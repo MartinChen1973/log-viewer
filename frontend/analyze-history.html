@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>分析历史 — log-viewer</title>
+    <script>
+      (function () {
+        var k = "log-viewer-theme";
+        var ok = { light: 1, dark: 1, blue: 1 };
+        var d = "light";
+        try {
+          var s = localStorage.getItem(k);
+          if (s && ok[s]) d = s;
+        } catch (e) {}
+        document.documentElement.setAttribute("data-theme", d);
+        document.documentElement.style.colorScheme =
+          d === "dark" ? "dark" : "light";
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/main.css" />
+  </head>
+  <body class="analyze-history-page">
+    <header class="app-header analyze-history-page__header">
+      <div class="app-header__top analyze-history-page__header-row">
+        <div class="app-header__brand">
+          <h1 class="analyze-history-page__title">
+            <a href="index.html" class="analyze-history-page__home-link"
+              >Log viewer</a
+            >
+            <span class="analyze-history-page__sep">—</span>
+            <span>分析历史</span>
+          </h1>
+        </div>
+        <nav class="analyze-history-page__nav" aria-label="页面">
+          <a href="index.html" class="analyze-history-page__back">返回列表</a>
+        </nav>
+      </div>
+    </header>
+    <div class="analyze-history-split" id="ah-split-root">
+      <aside
+        class="analyze-history-split__sidebar"
+        aria-label="分析历史记录"
+      >
+        <h2 class="analyze-history-split__sidebar-title">记录</h2>
+        <div class="analyze-history-split__list-wrap">
+          <ul class="analyze-history-list analyze-history-list--pane" id="ah-page-list"></ul>
+          <p class="analyze-history-list__empty" id="ah-page-empty" hidden>
+            暂无记录。
+          </p>
+        </div>
+      </aside>
+      <section
+        class="analyze-history-split__main"
+        aria-label="分析内容"
+      >
+        <div class="ai-analyze-result__bar analyze-history-split__content-head">
+          <div class="analyze-history-detail__headtext">
+            <span class="ai-analyze-result__title" id="ah-page-heading"
+              >分析结果</span
+            >
+            <p class="analyze-history-detail__meta" id="ah-page-meta"></p>
+          </div>
+        </div>
+        <div class="analyze-history-detail__scroll analyze-history-split__scroll">
+          <pre
+            class="ai-analyze-result__body analyze-history-split__body"
+            id="ah-page-body"
+          >选择左侧一条记录查看。</pre>
+          <div
+            class="ai-analyze-result__skill-footer"
+            id="ah-page-footer"
+            hidden
+            aria-label="调用与消耗"
+          ></div>
+        </div>
+      </section>
+    </div>
+    <script src="js/theme.js"></script>
+    <script type="module" src="js/analyze-history-main.js"></script>
+  </body>
+</html>

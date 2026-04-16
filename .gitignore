@@ -11,6 +11,9 @@ servers/
 # Generated test output
 backend/test_reports/
 
+# AGICTO-derived model list cache (generated on first lookup)
+ai-api/data/model_prices.yaml
+
 # LangGraph checkpoints (local runtime)
 ai-api/storage/checkpoints.sqlite
 ai-api/storage/checkpoints.sqlite-shm

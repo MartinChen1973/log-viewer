@@ -15,7 +15,13 @@ _BACKEND_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _BACKEND_DIR.parent
 
 from log_analysis.profile import resolve_profile
+from log_analysis.history_store import (
+    append_analysis_record,
+    get_entry_by_id,
+    list_summaries_newest_first,
+)
 from log_analysis.window import (
+    PRESET_LABELS,
     PRESET_ORDER,
     approx_tokens_from_bytes,
     preset_stats_for_capped_text,
@@ -407,6 +413,39 @@ def hourly_summary():
     )
 
 
+@app.route("/api/logs/analyze-history", methods=["GET"])
+def analyze_history_list():
+    ## ⬇️ Newest-first summaries (tokens / cost totals); full text via `/api/logs/analyze-history/<id>`.
+    return jsonify({"entries": list_summaries_newest_first()})
+
+
+@app.route("/api/logs/analyze-history/<entry_id>", methods=["GET"])
+def analyze_history_detail(entry_id: str):
+    ## ⬇️ One stored analysis for the popup viewer (YAML-backed).
+    row = get_entry_by_id(entry_id)
+    if row is None:
+        return jsonify({"error": "not found"}), 404
+    analysis = row.get("analysis")
+    if not isinstance(analysis, str):
+        analysis = ""
+    usage_items = row.get("usage_items")
+    if not isinstance(usage_items, list):
+        usage_items = []
+    return jsonify(
+        {
+            "id": row.get("id"),
+            "created_at": row.get("created_at"),
+            "log_name": row.get("log_name"),
+            "preset": row.get("preset"),
+            "preset_label": row.get("preset_label"),
+            "profile": row.get("profile"),
+            "approx_tokens": row.get("approx_tokens"),
+            "analysis": analysis,
+            "usage_items": usage_items,
+        }
+    )
+
+
 @app.route("/api/logs/<name>", methods=["GET"])
 def get_log(name: str):
     """Return one log file as JSON: safe path resolution, byte cap, optional ``tail`` line limit."""
@@ -549,6 +588,16 @@ def analyze_log(name: str):
     usage_items = data.get("usage_items")
     if not isinstance(usage_items, list):
         usage_items = []
+    preset_label = PRESET_LABELS.get(preset, preset)
+    append_analysis_record(
+        log_name=path.name,
+        preset=preset,
+        preset_label=preset_label,
+        profile=profile,
+        approx_tokens=approx_tok,
+        analysis=analysis,
+        usage_items=usage_items,
+    )
     return jsonify(
         {
             "analysis": analysis,

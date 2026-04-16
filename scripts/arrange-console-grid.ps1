@@ -1,4 +1,4 @@
-# ## ⬇️ Place start-all service consoles in a 3x2 grid on the primary monitor (five tiles + one spare).
+# ## ⬇️ Place start-all service consoles in a 3x2 grid on the primary monitor (AI, Flask, MCP log-analyzer top row; three MCP servers bottom row).
 $ErrorActionPreference = "Continue"
 # Tiling failures must not block start-all.bat from opening browser tabs.
 Add-Type -AssemblyName System.Windows.Forms
@@ -77,7 +77,7 @@ function Classify-FromProcess {
     if ($exe -match '(?i)\\mcp-servers\\mcp-server-oa\\venv\\Scripts\\python(\.exe)?$') { return "mcp_oa" }
     if ($exe -match '(?i)\\mcp-servers\\mcp-server-bingchuan\\venv\\Scripts\\python(\.exe)?$') { return "mcp_bc" }
     if ($exe -match '(?i)\\mcp-servers\\mcp-server\\venv\\Scripts\\python(\.exe)?$') { return "mcp_aux" }
-    if ($exe -match '(?i)\\mcp-servers\\mcp-log-analyzer\\venv\\Scripts\\python(\.exe)?$') { return $null }
+    if ($exe -match '(?i)\\mcp-servers\\mcp-log-analyzer\\venv\\Scripts\\python(\.exe)?$') { return "mcp_log" }
     if ($exe -match '(?i)\\mcp-servers\\mcp-server-rag\\venv\\Scripts\\python(\.exe)?$') { return "mcp_oa" }
   }
   if ($null -ne $cmd) {
@@ -97,8 +97,9 @@ function Classify-FromProcess {
     if ($cmd -match '(?i)mcp-server-oa') { if ($cmd -match '(?i)server\.py') { return "mcp_oa" } }
     if ($cmd -match '(?i)mcp-server-bingchuan') { if ($cmd -match '(?i)server\.py') { return "mcp_bc" } }
     if ($cmd -match '(?i)\\mcp-server\\') { if ($cmd -match '(?i)server\.py') { if ($cmd -notmatch '(?i)bingchuan') { return "mcp_aux" } } }
-    if ($cmd -match '(?i)mcp-log-analyzer') { if ($cmd -match '(?i)server\.py') { return $null } }
-    if ($cmd -match '(?i)server\.py(\s|$|")') { return "mcp_oa" }
+    if ($cmd -match '(?i)mcp-log-analyzer') { if ($cmd -match '(?i)server\.py') { return "mcp_log" } }
+    if ($cmd -match '(?i)(\\|/)backend(\\|/)') { if ($cmd -match '(?i)app\.py') { return "flask" } }
+    if ($cmd -match '(?i)server\.py(\s|$|")') { if ($cmd -notmatch '(?i)mcp-log-analyzer') { return "mcp_oa" } }
   }
   return $null
 }
@@ -115,6 +116,8 @@ function Get-ServiceSlot {
     if ($null -ne $slot) { return $slot }
   }
   # ## ⬇️ Title-only hints (Next.js replaces the cmd title with next-server)
+  if ($Title -like '*MCP log-analyzer*') { return "mcp_log" }
+  if ($Title -like '*Flask log-viewer*' -or $Title -like '*log-viewer server*') { return "flask" }
   if ($Title -like '*Node frontend (3500)*' -or $Title -like '*next-server*' -or $Title -like '*Next.js*') { return "next" }
   if ($Title -like '*AI API (8500)*' -or $Title -like '*uvicorn*') { return "ai" }
   if ($Title -like '*MCP Bingchuan (28083)*' -or $Title -like '*MCP Bingchuan (8683)*' -or $Title -like '*MCP Bingchuan (8503)*' -or $Title -like '*MCP Bingchuan (8501)*') { return "mcp_bc" }
@@ -147,11 +150,11 @@ $hHalf = [int][Math]::Floor($area.Height / 2)
 if ($wThird -lt 280) { $wThird = [int][Math]::Floor($area.Width / 2) }
 if ($hHalf -lt 240) { $hHalf = [int]$area.Height }
 
-# ## ⬇️ Top row: AI | Node | Next — bottom row: MCP OA (28081) | MCP Bingchuan (28083) | MCP aux (28082)
+# ## ⬇️ Top row: AI API | Flask log-viewer | MCP log-analyzer — bottom row: MCP OA | Bingchuan | aux (matches start-all.bat).
 $layout = @(
   @{ Id = "ai";       X = $left;                 Y = $top;           W = $wThird; H = $hHalf; TitleFallback = @("AI API (8500)", "uvicorn") }
-  @{ Id = "node";     X = $left + $wThird;      Y = $top;           W = $wThird; H = $hHalf; TitleFallback = @("Node backend (3501)", "npm start", "server.js") }
-  @{ Id = "next";     X = $left + 2 * $wThird;  Y = $top;           W = $wThird; H = $hHalf; TitleFallback = @("Node frontend (3500)", "next-server", "localhost:3500", "127.0.0.1:3500") }
+  @{ Id = "flask";   X = $left + $wThird;      Y = $top;           W = $wThird; H = $hHalf; TitleFallback = @("Flask log-viewer (5000)", "log-viewer server", "log-viewer") }
+  @{ Id = "mcp_log"; X = $left + 2 * $wThird;  Y = $top;           W = $wThird; H = $hHalf; TitleFallback = @("MCP log-analyzer (28084)", "log-analyzer (28084)") }
   @{ Id = "mcp_oa";   X = $left;                 Y = $top + $hHalf; W = $wThird; H = $hHalf; TitleFallback = @("MCP OA (28081)", "MCP OA (8681)", "MCP OA (8501)", "MCP server (8501)") }
   @{ Id = "mcp_bc";   X = $left + $wThird;      Y = $top + $hHalf; W = $wThird; H = $hHalf; TitleFallback = @("MCP Bingchuan (28083)", "MCP Bingchuan (8683)", "MCP Bingchuan (8503)", "MCP Bingchuan (8501)", "MCP server (8501)") }
   @{ Id = "mcp_aux";  X = $left + 2 * $wThird;  Y = $top + $hHalf; W = $wThird; H = $hHalf; TitleFallback = @("MCP aux (28082)", "MCP aux (8682)", "MCP aux (8502)", "MCP server (8502)") }

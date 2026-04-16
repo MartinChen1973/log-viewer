@@ -34,6 +34,8 @@ from deepagents.backends import CompositeBackend, FilesystemBackend, LocalShellB
 from tools.internet_search import get_local_tools
 from tools.skill_tools import get_skill_tools
 
+from model_prices import estimated_step_cost_cny, resolve_cny_prices_per_million
+
 ## ⬇️ Repo-root .env (full-stack-deepagents/.env)
 from dotenv import find_dotenv
 load_dotenv(find_dotenv(), override=True)
@@ -246,6 +248,18 @@ class UsageItemOut(BaseModel):
     cost_usd: float | None = Field(
         default=None,
         description="Provider-reported cost in USD when present in message metadata.",
+    )
+    price_input_cny_per_million: float | None = Field(
+        default=None,
+        description="AGICTO list price (CNY per 1M input tokens) from data/model_prices.yaml.",
+    )
+    price_output_cny_per_million: float | None = Field(
+        default=None,
+        description="AGICTO list price (CNY per 1M output tokens) from data/model_prices.yaml.",
+    )
+    estimated_cost_cny: float | None = Field(
+        default=None,
+        description="Estimated step cost in CNY from token counts × AGICTO prices.",
     )
 
 
@@ -785,6 +799,8 @@ def _usage_items_from_analyze_trace(
     model_label: str,
     playbook_profile: str,
     playbook_inlined: bool,
+    cny_in_million: float | None = None,
+    cny_out_million: float | None = None,
 ) -> list[UsageItemOut]:
     ## ⬇️ Chronological steps: optional inlined playbook skill, then each agent/tool/skill-from-tool turn.
     ml = (model_label or "").strip() or "LLM"
@@ -799,6 +815,9 @@ def _usage_items_from_analyze_trace(
                 input_tokens=None,
                 output_tokens=None,
                 cost_usd=None,
+                price_input_cny_per_million=None,
+                price_output_cny_per_million=None,
+                estimated_cost_cny=None,
             )
         )
         seen_skill_ids.add(playbook_profile)
@@ -811,6 +830,9 @@ def _usage_items_from_analyze_trace(
             agent_turn += 1
             _p, _c, tot_t = _usage_tokens_from_ai_message(m)
             cost_u = _usage_cost_from_ai_message(m)
+            est_cny = estimated_step_cost_cny(
+                _p, _c, cny_in_million, cny_out_million,
+            )
             label = ml if agent_turn == 1 else f"{ml} (turn {agent_turn})"
             items.append(
                 UsageItemOut(
@@ -820,6 +842,9 @@ def _usage_items_from_analyze_trace(
                     input_tokens=_p,
                     output_tokens=_c,
                     cost_usd=cost_u,
+                    price_input_cny_per_million=cny_in_million,
+                    price_output_cny_per_million=cny_out_million,
+                    estimated_cost_cny=est_cny,
                 )
             )
         elif isinstance(m, ToolMessage):
@@ -832,6 +857,9 @@ def _usage_items_from_analyze_trace(
                     input_tokens=None,
                     output_tokens=None,
                     cost_usd=None,
+                    price_input_cny_per_million=None,
+                    price_output_cny_per_million=None,
+                    estimated_cost_cny=None,
                 )
             )
             tc = _tool_call_for_tool_message(messages, idx, m)
@@ -847,6 +875,9 @@ def _usage_items_from_analyze_trace(
                             input_tokens=None,
                             output_tokens=None,
                             cost_usd=None,
+                            price_input_cny_per_million=None,
+                            price_output_cny_per_million=None,
+                            estimated_cost_cny=None,
                         )
                     )
 
@@ -859,6 +890,9 @@ def _usage_items_from_analyze_trace(
                 input_tokens=None,
                 output_tokens=None,
                 cost_usd=None,
+                price_input_cny_per_million=cny_in_million,
+                price_output_cny_per_million=cny_out_million,
+                estimated_cost_cny=None,
             )
         )
     return items
@@ -1841,11 +1875,17 @@ async def analyze_log_http(body: AnalyzeLogRequest) -> AnalyzeLogResponse:
             exc_info=True,
         )
     analysis = _last_assistant_reply(raw_messages)
+    cny_in, cny_out = await asyncio.to_thread(
+        resolve_cny_prices_per_million,
+        model_label,
+    )
     usage_items = _usage_items_from_analyze_trace(
         raw_messages,
         model_label=model_label,
         playbook_profile=(body.log_profile or "").strip(),
         playbook_inlined=(load_status == "loaded" and bool(playbook_md)),
+        cny_in_million=cny_in,
+        cny_out_million=cny_out,
     )
     elapsed_ms = int((time.perf_counter() - t0) * 1000)
     logger.info(
