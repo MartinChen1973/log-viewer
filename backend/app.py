@@ -1,17 +1,26 @@
 ## ⬇️ Flask app: serves frontend static files and JSON APIs for log files under LOG_ROOT.
 import calendar
+import json
 import os
 import re
+import sys
+import urllib.error
+import urllib.request
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Dict, List, Literal, Optional, Tuple
 
 from flask import Flask, Response, jsonify, request, send_from_directory
 
-from paths import get_log_root
-
 _BACKEND_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _BACKEND_DIR.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from paths import get_log_root
+
+from aiend.profile import resolve_profile
+from aiend.window import PRESET_ORDER, approx_tokens_from_bytes, preset_stats_for_capped_text, slice_for_preset
 _FRONTEND_DIR = _REPO_ROOT / "frontend"
 _OPENAPI_PATH = _BACKEND_DIR / "openapi.json"
 
@@ -19,6 +28,9 @@ _OPENAPI_PATH = _BACKEND_DIR / "openapi.json"
 _MAX_LOG_BYTES = int(os.environ.get("MAX_LOG_BYTES", str(2 * 1024 * 1024)))
 # ⬇️ Bytes read from start/end of each file when scanning the list for error/warning heuristics (cap total read).
 _SCAN_SLICE = int(os.environ.get("LOG_LIST_SCAN_BYTES", str(48 * 1024)))
+## ⬇️ Log analysis proxies to FastAPI `POST /analyze-log` (run ai-api or start-all.bat).
+_AI_ANALYZE_URL = (os.environ.get("AI_ANALYZE_URL") or "http://127.0.0.1:8500/analyze-log").strip()
+_PRESET_IDS = frozenset(PRESET_ORDER)
 
 _LOG_ERROR_RE = re.compile(
     r"(?i)(exception\b|traceback|\bfatal\b|\berror\b|\bcritical\b|errno\s+|failed\s+with|\] err(?:or)?\b)",
@@ -269,9 +281,32 @@ app = Flask(__name__, static_folder=str(_FRONTEND_DIR), static_url_path="")
 def add_cors(response):
     ## ⬇️ Allow local dev when frontend is opened from another origin or port.
     response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return response
+
+
+def _read_log_text_capped(path: Path) -> Tuple[str, int, bool]:
+    ## ���️ Same tail cap as `get_log`; presets and analyze run on this slice only when the file is large.
+    try:
+        size = path.stat().st_size
+    except OSError as e:
+        raise OSError(str(e)) from e
+    truncated = False
+    if size > _MAX_LOG_BYTES:
+        truncated = True
+        with path.open("rb") as f:
+            f.seek(max(0, size - _MAX_LOG_BYTES))
+            raw = f.read()
+        nl = raw.find(b"\n")
+        if nl != -1:
+            raw = raw[nl + 1 :]
+        text = raw.decode("utf-8", errors="replace")
+        prefix = f"[… truncated: showing last ~{_MAX_LOG_BYTES} bytes …]\n"
+        text = prefix + text
+    else:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    return text, size, truncated
 
 
 def _safe_log_path(name: str) -> Optional[Path]:
@@ -373,6 +408,7 @@ def hourly_summary():
 
 @app.route("/api/logs/<name>", methods=["GET"])
 def get_log(name: str):
+    """Return one log file as JSON: safe path resolution, byte cap, optional ``tail`` line limit."""
     ## ⬇️ Step 1️⃣ — Resolve `name` to a safe path under the log root; 404 if missing or traversal. / 步骤 1️⃣ — 将 `name` 解析为日志根下的安全路径；不存在或路径穿越则 404。
     path = _safe_log_path(name)
     if path is None:
@@ -412,6 +448,111 @@ def get_log(name: str):
             "size": size,
             "truncated": truncated,
             "content": text,
+        }
+    )
+
+
+@app.route("/api/logs/<name>/analyze-presets", methods=["GET"])
+def analyze_presets(name: str):
+    ## ���️ Token estimates: UTF-8 bytes of time-filtered slice / 3 (rounded); uses capped tail when file is huge.
+    path = _safe_log_path(name)
+    if path is None:
+        return jsonify({"error": "not found or invalid name"}), 404
+    try:
+        text, size, truncated = _read_log_text_capped(path)
+    except OSError as e:
+        return jsonify({"error": str(e)}), 500
+    presets = preset_stats_for_capped_text(text)
+    return jsonify(
+        {
+            "name": path.name,
+            "source_size": size,
+            "source_truncated": truncated,
+            "presets": presets,
+        }
+    )
+
+
+@app.route("/api/logs/<name>/analyze", methods=["POST", "OPTIONS"])
+def analyze_log(name: str):
+    ## ���️ JSON body `preset`; forwards excerpt to ai-api Deep Agent analysis.
+    if request.method == "OPTIONS":
+        return Response(status=204)
+    path = _safe_log_path(name)
+    if path is None:
+        return jsonify({"error": "not found or invalid name"}), 404
+    body = request.get_json(silent=True) or {}
+    preset = (body.get("preset") or "").strip()
+    if preset not in _PRESET_IDS:
+        return jsonify({"error": "invalid or missing preset"}), 400
+    try:
+        text, size, truncated = _read_log_text_capped(path)
+    except OSError as e:
+        return jsonify({"error": str(e)}), 500
+    content = slice_for_preset(text, preset)
+    byte_len = len(content.encode("utf-8"))
+    approx_tok = approx_tokens_from_bytes(byte_len)
+    profile = resolve_profile(path.name)
+    payload = {
+        "log_name": path.name,
+        "preset": preset,
+        "log_profile": profile,
+        "content": content,
+        "approx_tokens": approx_tok,
+        "byte_length": byte_len,
+        "source_truncated": truncated,
+        "source_size": size,
+    }
+    req = urllib.request.Request(
+        _AI_ANALYZE_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        method="POST",
+        headers={"Content-Type": "application/json; charset=utf-8"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=600) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+            data = json.loads(raw) if raw.strip() else {}
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="replace") if e.fp else ""
+        return (
+            jsonify(
+                {
+                    "analysis": "",
+                    "preset": preset,
+                    "approx_tokens": approx_tok,
+                    "profile": profile,
+                    "ai_error": err_body or e.reason,
+                    "source_truncated": truncated,
+                }
+            ),
+            502,
+        )
+    except urllib.error.URLError as e:
+        return (
+            jsonify(
+                {
+                    "analysis": "",
+                    "preset": preset,
+                    "approx_tokens": approx_tok,
+                    "profile": profile,
+                    "ai_error": str(e.reason) if e.reason else str(e),
+                    "source_truncated": truncated,
+                }
+            ),
+            502,
+        )
+    analysis = data.get("analysis")
+    if not isinstance(analysis, str):
+        analysis = ""
+    return jsonify(
+        {
+            "analysis": analysis,
+            "preset": preset,
+            "approx_tokens": approx_tok,
+            "profile": profile,
+            "ai_error": None,
+            "source_truncated": truncated,
         }
     )
 

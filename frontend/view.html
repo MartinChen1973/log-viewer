@@ -65,10 +65,37 @@
       </div>
     </header>
     <main class="viewer viewer-full">
+      <div class="view-ai-analyze ai-analyze-toolbar" id="view-ai-analyze" hidden>
+        <span class="ai-analyze-toolbar__label" id="view-ai-label">AI 分析</span>
+        <div class="ai-analyze-toolbar__controls">
+          <select
+            id="view-ai-preset"
+            class="ai-analyze-toolbar__select"
+            aria-labelledby="view-ai-label"
+          ></select>
+          <button type="button" id="view-ai-run" class="ai-analyze-toolbar__run">
+            运行
+          </button>
+        </div>
+      </div>
+      <div class="ai-analyze-result view-ai-result" id="view-ai-result" hidden>
+        <div class="ai-analyze-result__bar">
+          <span class="ai-analyze-result__title">分析结果</span>
+          <button
+            type="button"
+            class="ai-analyze-result__close"
+            id="view-ai-close"
+            aria-label="Close analysis panel"
+          >
+            ×
+          </button>
+        </div>
+        <pre class="ai-analyze-result__body" id="view-ai-result-body"></pre>
+      </div>
       <pre id="log-content" class="log-content" aria-live="polite">Loading…</pre>
     </main>
     <p class="error" id="error-banner" hidden role="alert"></p>
     <script src="js/theme.js"></script>
-    <script src="js/view.js"></script>
+    <script type="module" src="js/view.js"></script>
   </body>
 </html>

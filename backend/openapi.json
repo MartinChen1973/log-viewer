@@ -207,6 +207,154 @@
           }
         }
       }
+    },
+    "/api/logs/{name}/analyze-presets": {
+      "get": {
+        "summary": "AI analysis preset sizes for one log",
+        "description": "Returns approximate token counts (UTF-8 bytes of time-filtered slice / 3) per preset. Large files use the same tail cap as GET /api/logs/{name}; stats apply to that slice only.",
+        "operationId": "analyzePresets",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Per-preset byte and token estimates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["name", "source_size", "source_truncated", "presets"],
+                  "properties": {
+                    "name": { "type": "string" },
+                    "source_size": { "type": "integer" },
+                    "source_truncated": { "type": "boolean" },
+                    "presets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["id", "label", "bytes", "approx_tokens"],
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "enum": ["last_1h", "today", "week", "last_7d", "last_30d"]
+                          },
+                          "label": { "type": "string" },
+                          "bytes": { "type": "integer", "minimum": 0 },
+                          "approx_tokens": { "type": "integer", "minimum": 0 }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "500": {
+            "description": "Filesystem error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/logs/{name}/analyze": {
+      "post": {
+        "summary": "Run AI analysis for a time window",
+        "description": "Proxies log excerpt to the configured AI API (default POST http://127.0.0.1:8500/analyze-log). Set AI_ANALYZE_URL to override.",
+        "operationId": "analyzeLog",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["preset"],
+                "properties": {
+                  "preset": {
+                    "type": "string",
+                    "enum": ["last_1h", "today", "week", "last_7d", "last_30d"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analysis text from AI API",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["analysis", "preset", "approx_tokens", "profile", "ai_error", "source_truncated"],
+                  "properties": {
+                    "analysis": { "type": "string" },
+                    "preset": { "type": "string" },
+                    "approx_tokens": { "type": "integer" },
+                    "profile": { "type": "string" },
+                    "ai_error": { "type": ["string", "null"] },
+                    "source_truncated": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid preset",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "502": {
+            "description": "AI API unreachable or error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "analysis": { "type": "string" },
+                    "ai_error": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

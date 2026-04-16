@@ -1,0 +1,21 @@
+
+=== ERROR 2026-04-09T16:15:09.848009 ===
+Error: Invalid template: 'CRUD'. Valid templates are: CIDED, CIDRA, CID
+Arguments received: ['C:\\Projects\\Courses\\lllm\\full-stack-deepagents\\ai-api\\skills\\action-finder\\scripts\\log.py', '考试记录', 'CRUD', 'createExamRecord', 'readExamRecord', 'updateExamRecord', 'deleteExamRecord']
+Script directory: C:\Projects\Courses\lllm\full-stack-deepagents\ai-api\skills\action-finder\scripts
+Current working directory: c:\Projects\Courses\lllm\full-stack-deepagents\ai-api
+==================================================
+
+=== ERROR 2026-04-09T16:36:43.888331 ===
+Error: Invalid template: 'CRUD'. Valid templates are: CIDED, CIDRA, CID
+Arguments received: ['C:\\Projects\\Courses\\lllm\\full-stack-deepagents\\ai-api\\skills\\action-finder\\scripts\\log.py', '送货订单', 'CRUD', 'createDeliveryOrder', 'readDeliveryOrder', 'updateDeliveryOrder', 'deleteDeliveryOrder']
+Script directory: C:\Projects\Courses\lllm\full-stack-deepagents\ai-api\skills\action-finder\scripts
+Current working directory: c:\Projects\Courses\lllm\full-stack-deepagents\ai-api
+==================================================
+
+=== ERROR 2026-04-09T16:43:57.772977 ===
+Error: Invalid template: 'CRUD'. Valid templates are: CIDED, CIDRA, CID
+Arguments received: ['C:\\Projects\\Courses\\lllm\\full-stack-deepagents\\ai-api\\skills\\action-finder\\scripts\\log.py', '产品订单', 'CRUD', 'createOrder', 'readOrder', 'updateOrder', 'deleteOrder']
+Script directory: C:\Projects\Courses\lllm\full-stack-deepagents\ai-api\skills\action-finder\scripts
+Current working directory: c:\Projects\Courses\lllm\full-stack-deepagents\ai-api
+==================================================

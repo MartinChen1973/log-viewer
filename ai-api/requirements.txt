@@ -1,0 +1,10 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+python-dotenv>=1.0.0
+deepagents
+langchain>=1.0.0
+langchain-openai>=1.0.0
+langchain-mcp-adapters>=0.2.0
+tavily-python>=0.5.0
+langgraph-checkpoint-sqlite>=3.0.0
+PyYAML>=6.0.0

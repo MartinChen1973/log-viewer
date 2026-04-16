@@ -1,0 +1,28 @@
+{
+  "servers": [
+    {
+      "id": "oa",
+      "url": "http://127.0.0.1:28081/mcp",
+      "headers": {},
+      "deleted": false
+    },
+    {
+      "id": "bingchuan",
+      "url": "http://127.0.0.1:28083/mcp",
+      "headers": {},
+      "deleted": false
+    },
+    {
+      "id": "aux",
+      "url": "http://127.0.0.1:28082/mcp",
+      "headers": {},
+      "deleted": true
+    },
+    {
+      "id": "log_analyzer",
+      "url": "http://127.0.0.1:28084/mcp",
+      "headers": {},
+      "deleted": false
+    }
+  ]
+}

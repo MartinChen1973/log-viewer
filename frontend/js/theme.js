@@ -7,7 +7,9 @@
     try {
       var t = localStorage.getItem(STORAGE_KEY);
       if (t && THEMES[t]) return t;
-    } catch (e) {}
+    } catch {
+      /* ⬅️ localStorage may be unavailable (e.g. private mode). */
+    }
     return null;
   }
 
@@ -22,7 +24,9 @@
     setColorSchemeMeta(theme);
     try {
       localStorage.setItem(STORAGE_KEY, theme);
-    } catch (e) {}
+    } catch {
+      /* ⬅️ Persist may fail when storage is blocked; UI theme still applies. */
+    }
     syncButtons(theme);
   }
 

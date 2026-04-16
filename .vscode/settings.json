@@ -1,4 +1,5 @@
 {
+  "eslint.workingDirectories": ["frontend"],
   "python.analysis.extraPaths": ["${workspaceFolder}/backend"],
   "files.insertFinalNewline": true,
   "files.trimTrailingWhitespace": true,

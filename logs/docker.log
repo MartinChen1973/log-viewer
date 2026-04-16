@@ -1,212 +1,44 @@
-{"log":"2026-03-18T08:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-18T08:00:01.102304567Z"}
-{"log":"2026-03-18T08:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-18T08:00:01.205891234Z"}
-{"log":"2026-03-18T08:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-18T08:00:05.331442891Z"}
-{"log":"2026-03-18T08:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-18T08:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-18T08:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-18T08:02:00.015000002Z"}
-{"log":"2026-03-18T08:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-18T08:03:44.551773112Z"}
-{"log":"2026-03-18T09:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-18T09:00:01.102304567Z"}
-{"log":"2026-03-18T09:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-18T09:00:01.205891234Z"}
-{"log":"2026-03-18T09:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-18T09:00:05.331442891Z"}
-{"log":"2026-03-18T09:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-18T09:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-18T09:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-18T09:02:00.015000002Z"}
-{"log":"2026-03-18T09:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-18T09:03:44.551773112Z"}
-{"log":"2026-03-18T10:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-18T10:00:01.102304567Z"}
-{"log":"2026-03-18T10:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-18T10:00:01.205891234Z"}
-{"log":"2026-03-18T10:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-18T10:00:05.331442891Z"}
-{"log":"2026-03-18T10:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-18T10:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-18T10:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-18T10:02:00.015000002Z"}
-{"log":"2026-03-18T10:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-18T10:03:44.551773112Z"}
-{"log":"2026-03-18T11:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-18T11:00:01.102304567Z"}
-{"log":"2026-03-18T11:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-18T11:00:01.205891234Z"}
-{"log":"2026-03-18T11:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-18T11:00:05.331442891Z"}
-{"log":"2026-03-18T11:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-18T11:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-18T11:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-18T11:02:00.015000002Z"}
-{"log":"2026-03-18T11:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-18T11:03:44.551773112Z"}
-{"log":"2026-03-19T08:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-19T08:00:01.102304567Z"}
-{"log":"2026-03-19T08:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-19T08:00:01.205891234Z"}
-{"log":"2026-03-19T08:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-19T08:00:05.331442891Z"}
-{"log":"2026-03-19T08:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-19T08:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-19T08:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-19T08:02:00.015000002Z"}
-{"log":"2026-03-19T08:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-19T08:03:44.551773112Z"}
-{"log":"2026-03-19T09:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-19T09:00:01.102304567Z"}
-{"log":"2026-03-19T09:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-19T09:00:01.205891234Z"}
-{"log":"2026-03-19T09:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-19T09:00:05.331442891Z"}
-{"log":"2026-03-19T09:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-19T09:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-19T09:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-19T09:02:00.015000002Z"}
-{"log":"2026-03-19T09:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-19T09:03:44.551773112Z"}
-{"log":"2026-03-19T10:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-19T10:00:01.102304567Z"}
-{"log":"2026-03-19T10:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-19T10:00:01.205891234Z"}
-{"log":"2026-03-19T10:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-19T10:00:05.331442891Z"}
-{"log":"2026-03-19T10:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-19T10:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-19T10:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-19T10:02:00.015000002Z"}
-{"log":"2026-03-19T10:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-19T10:03:44.551773112Z"}
-{"log":"2026-03-19T11:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-19T11:00:01.102304567Z"}
-{"log":"2026-03-19T11:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-19T11:00:01.205891234Z"}
-{"log":"2026-03-19T11:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-19T11:00:05.331442891Z"}
-{"log":"2026-03-19T11:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-19T11:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-19T11:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-19T11:02:00.015000002Z"}
-{"log":"2026-03-19T11:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-19T11:03:44.551773112Z"}
-{"log":"2026-03-20T08:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-20T08:00:01.102304567Z"}
-{"log":"2026-03-20T08:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-20T08:00:01.205891234Z"}
-{"log":"2026-03-20T08:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-20T08:00:05.331442891Z"}
-{"log":"2026-03-20T08:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-20T08:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-20T08:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-20T08:02:00.015000002Z"}
-{"log":"2026-03-20T08:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-20T08:03:44.551773112Z"}
-{"log":"2026-03-20T09:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-20T09:00:01.102304567Z"}
-{"log":"2026-03-20T09:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-20T09:00:01.205891234Z"}
-{"log":"2026-03-20T09:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-20T09:00:05.331442891Z"}
-{"log":"2026-03-20T09:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-20T09:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-20T09:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-20T09:02:00.015000002Z"}
-{"log":"2026-03-20T09:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-20T09:03:44.551773112Z"}
-{"log":"2026-03-20T10:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-20T10:00:01.102304567Z"}
-{"log":"2026-03-20T10:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-20T10:00:01.205891234Z"}
-{"log":"2026-03-20T10:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-20T10:00:05.331442891Z"}
-{"log":"2026-03-20T10:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-20T10:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-20T10:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-20T10:02:00.015000002Z"}
-{"log":"2026-03-20T10:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-20T10:03:44.551773112Z"}
-{"log":"2026-03-20T11:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-20T11:00:01.102304567Z"}
-{"log":"2026-03-20T11:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-20T11:00:01.205891234Z"}
-{"log":"2026-03-20T11:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-20T11:00:05.331442891Z"}
-{"log":"2026-03-20T11:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-20T11:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-20T11:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-20T11:02:00.015000002Z"}
-{"log":"2026-03-20T11:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-20T11:03:44.551773112Z"}
-{"log":"2026-03-21T08:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-21T08:00:01.102304567Z"}
-{"log":"2026-03-21T08:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-21T08:00:01.205891234Z"}
-{"log":"2026-03-21T08:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-21T08:00:05.331442891Z"}
-{"log":"2026-03-21T08:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-21T08:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-21T08:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-21T08:02:00.015000002Z"}
-{"log":"2026-03-21T08:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-21T08:03:44.551773112Z"}
-{"log":"2026-03-21T09:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-21T09:00:01.102304567Z"}
-{"log":"2026-03-21T09:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-21T09:00:01.205891234Z"}
-{"log":"2026-03-21T09:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-21T09:00:05.331442891Z"}
-{"log":"2026-03-21T09:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-21T09:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-21T09:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-21T09:02:00.015000002Z"}
-{"log":"2026-03-21T09:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-21T09:03:44.551773112Z"}
-{"log":"2026-03-21T10:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-21T10:00:01.102304567Z"}
-{"log":"2026-03-21T10:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-21T10:00:01.205891234Z"}
-{"log":"2026-03-21T10:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-21T10:00:05.331442891Z"}
-{"log":"2026-03-21T10:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-21T10:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-21T10:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-21T10:02:00.015000002Z"}
-{"log":"2026-03-21T10:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-21T10:03:44.551773112Z"}
-{"log":"2026-03-21T11:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-21T11:00:01.102304567Z"}
-{"log":"2026-03-21T11:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-21T11:00:01.205891234Z"}
-{"log":"2026-03-21T11:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-21T11:00:05.331442891Z"}
-{"log":"2026-03-21T11:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-21T11:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-21T11:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-21T11:02:00.015000002Z"}
-{"log":"2026-03-21T11:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-21T11:03:44.551773112Z"}
-{"log":"2026-03-22T08:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-22T08:00:01.102304567Z"}
-{"log":"2026-03-22T08:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-22T08:00:01.205891234Z"}
-{"log":"2026-03-22T08:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-22T08:00:05.331442891Z"}
-{"log":"2026-03-22T08:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-22T08:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-22T08:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-22T08:02:00.015000002Z"}
-{"log":"2026-03-22T08:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-22T08:03:44.551773112Z"}
-{"log":"2026-03-22T09:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-22T09:00:01.102304567Z"}
-{"log":"2026-03-22T09:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-22T09:00:01.205891234Z"}
-{"log":"2026-03-22T09:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-22T09:00:05.331442891Z"}
-{"log":"2026-03-22T09:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-22T09:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-22T09:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-22T09:02:00.015000002Z"}
-{"log":"2026-03-22T09:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-22T09:03:44.551773112Z"}
-{"log":"2026-03-22T10:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-22T10:00:01.102304567Z"}
-{"log":"2026-03-22T10:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-22T10:00:01.205891234Z"}
-{"log":"2026-03-22T10:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-22T10:00:05.331442891Z"}
-{"log":"2026-03-22T10:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-22T10:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-22T10:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-22T10:02:00.015000002Z"}
-{"log":"2026-03-22T10:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-22T10:03:44.551773112Z"}
-{"log":"2026-03-22T11:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-22T11:00:01.102304567Z"}
-{"log":"2026-03-22T11:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-22T11:00:01.205891234Z"}
-{"log":"2026-03-22T11:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-22T11:00:05.331442891Z"}
-{"log":"2026-03-22T11:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-22T11:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-22T11:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-22T11:02:00.015000002Z"}
-{"log":"2026-03-22T11:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-22T11:03:44.551773112Z"}
-{"log":"2026-03-23T08:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-23T08:00:01.102304567Z"}
-{"log":"2026-03-23T08:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-23T08:00:01.205891234Z"}
-{"log":"2026-03-23T08:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-23T08:00:05.331442891Z"}
-{"log":"2026-03-23T08:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-23T08:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-23T08:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-23T08:02:00.015000002Z"}
-{"log":"2026-03-23T08:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-23T08:03:44.551773112Z"}
-{"log":"2026-03-23T09:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-23T09:00:01.102304567Z"}
-{"log":"2026-03-23T09:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-23T09:00:01.205891234Z"}
-{"log":"2026-03-23T09:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-23T09:00:05.331442891Z"}
-{"log":"2026-03-23T09:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-23T09:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-23T09:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-23T09:02:00.015000002Z"}
-{"log":"2026-03-23T09:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-23T09:03:44.551773112Z"}
-{"log":"2026-03-23T10:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-23T10:00:01.102304567Z"}
-{"log":"2026-03-23T10:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-23T10:00:01.205891234Z"}
-{"log":"2026-03-23T10:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-23T10:00:05.331442891Z"}
-{"log":"2026-03-23T10:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-23T10:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-23T10:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-23T10:02:00.015000002Z"}
-{"log":"2026-03-23T10:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-23T10:03:44.551773112Z"}
-{"log":"2026-03-23T11:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-23T11:00:01.102304567Z"}
-{"log":"2026-03-23T11:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-23T11:00:01.205891234Z"}
-{"log":"2026-03-23T11:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-23T11:00:05.331442891Z"}
-{"log":"2026-03-23T11:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-23T11:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-23T11:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-23T11:02:00.015000002Z"}
-{"log":"2026-03-23T11:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-23T11:03:44.551773112Z"}
-{"log":"2026-03-24T08:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-24T08:00:01.102304567Z"}
-{"log":"2026-03-24T08:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-24T08:00:01.205891234Z"}
-{"log":"2026-03-24T08:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-24T08:00:05.331442891Z"}
-{"log":"2026-03-24T08:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-24T08:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-24T08:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-24T08:02:00.015000002Z"}
-{"log":"2026-03-24T08:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-24T08:03:44.551773112Z"}
-{"log":"2026-03-24T09:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-24T09:00:01.102304567Z"}
-{"log":"2026-03-24T09:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-24T09:00:01.205891234Z"}
-{"log":"2026-03-24T09:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-24T09:00:05.331442891Z"}
-{"log":"2026-03-24T09:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-24T09:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-24T09:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-24T09:02:00.015000002Z"}
-{"log":"2026-03-24T09:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-24T09:03:44.551773112Z"}
-{"log":"2026-03-24T10:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-24T10:00:01.102304567Z"}
-{"log":"2026-03-24T10:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-24T10:00:01.205891234Z"}
-{"log":"2026-03-24T10:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-24T10:00:05.331442891Z"}
-{"log":"2026-03-24T10:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-24T10:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-24T10:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-24T10:02:00.015000002Z"}
-{"log":"2026-03-24T10:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-24T10:03:44.551773112Z"}
-{"log":"2026-03-24T11:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.4.1\n","stream":"stdout","time":"2026-03-24T11:00:01.102304567Z"}
-{"log":"2026-03-24T11:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-03-24T11:00:01.205891234Z"}
-{"log":"2026-03-24T11:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 120ms\n","stream":"stderr","time":"2026-03-24T11:00:05.331442891Z"}
-{"log":"2026-03-24T11:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-03-24T11:01:12.884129445Z"}
-{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-03-24T11:02:00.001000001Z"}
-{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-03-24T11:02:00.015000002Z"}
-{"log":"2026-03-24T11:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=500, durationMs=842\n","stream":"stdout","time":"2026-03-24T11:03:44.551773112Z"}
-{"log": "INFO  [pool-2-thread-1] c.e.api.cache.RedisClient - cache warm-up complete, keys=3903\n", "stream": "stdout", "time": "2026-03-25T17:35:06.694327567Z"}
-{"log": "GET /api/v1/heartbeat 204 3ms\n", "stream": "stdout", "time": "2026-03-25T22:45:32.708405567Z"}
-{"log": "POST /api/v1/events 202 9ms\n", "stream": "stdout", "time": "2026-03-25T20:29:17.997976567Z"}
-{"log": "ERROR [http-nio-8080-exec-9] c.e.api.pay.PaymentClient - gateway timeout after 8407ms\n", "stream": "stderr", "time": "2026-03-25T18:47:18.334844567Z"}
-{"log": "WARN  [http-nio-8080-exec-3] c.e.api.auth.JwtFilter - token near expiry for subject=user_624\n", "stream": "stderr", "time": "2026-03-26T17:31:41.010462567Z"}
-{"log": "GET /api/v1/heartbeat 204 2ms\n", "stream": "stdout", "time": "2026-03-26T18:29:57.160400567Z"}
-{"log": "POST /api/v1/events 202 23ms\n", "stream": "stdout", "time": "2026-03-26T05:55:36.616207567Z"}
-{"log": "INFO  [scheduled-task] c.e.api.jobs.ReportJob - exported rows=462, file=report_9.csv\n", "stream": "stdout", "time": "2026-03-26T04:13:12.939912567Z"}
-{"log": "GET /api/v1/heartbeat 204 5ms\n", "stream": "stdout", "time": "2026-03-26T03:35:14.573607567Z"}
-{"log": "INFO  [pool-2-thread-1] c.e.api.cache.RedisClient - cache warm-up complete, keys=7910\n", "stream": "stdout", "time": "2026-03-27T23:45:11.931478567Z"}
-{"log": "ERROR [http-nio-8080-exec-9] c.e.api.pay.PaymentClient - gateway timeout after 12331ms\n", "stream": "stderr", "time": "2026-03-27T07:28:23.831743567Z"}
-{"log": "DEBUG [http-nio-8080-exec-7] c.e.api.web.RequestTrace - rid=3b04 method=GET path=/api/v1/orders ms=65\n", "stream": "stdout", "time": "2026-03-27T03:53:35.503782567Z"}
-{"log": "POST /api/v1/events 202 24ms\n", "stream": "stdout", "time": "2026-03-27T00:07:25.326623567Z"}
-{"log": "POST /api/v1/events 202 21ms\n", "stream": "stdout", "time": "2026-03-27T17:31:06.782312567Z"}
-{"log": "GET /api/v1/heartbeat 204 1ms\n", "stream": "stdout", "time": "2026-03-27T14:35:50.353847567Z"}
-{"log": "2026-03-27T09:18:44.112Z INFO  [main] com.example.api.Bootstrap - health check OK\n", "stream": "stdout", "time": "2026-03-27T09:18:44.112304567Z"}
+{"log":"2026-04-15T06:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.5.0\n","stream":"stdout","time":"2026-04-15T06:00:01.102304567Z"}
+{"log":"2026-04-15T06:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-04-15T06:00:01.205891234Z"}
+{"log":"2026-04-15T06:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 95ms\n","stream":"stderr","time":"2026-04-15T06:00:05.331442891Z"}
+{"log":"2026-04-15T06:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-04-15T06:01:12.884129445Z"}
+{"log":"GET /healthz 200 3ms\n","stream":"stdout","time":"2026-04-15T06:02:00.001000001Z"}
+{"log":"GET /metrics 200 11ms\n","stream":"stdout","time":"2026-04-15T06:02:00.015000002Z"}
+{"log":"2026-04-15T06:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=512, durationMs=791\n","stream":"stdout","time":"2026-04-15T06:03:44.551773112Z"}
+{"log":"2026-04-15T09:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.5.0\n","stream":"stdout","time":"2026-04-15T09:00:01.102304567Z"}
+{"log":"2026-04-15T09:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-04-15T09:00:01.205891234Z"}
+{"log":"2026-04-15T09:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 95ms\n","stream":"stderr","time":"2026-04-15T09:00:05.331442891Z"}
+{"log":"2026-04-15T09:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-04-15T09:01:12.884129445Z"}
+{"log":"GET /healthz 200 2ms\n","stream":"stdout","time":"2026-04-15T09:02:00.001000001Z"}
+{"log":"GET /metrics 200 10ms\n","stream":"stdout","time":"2026-04-15T09:02:00.015000002Z"}
+{"log":"2026-04-15T09:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=512, durationMs=791\n","stream":"stdout","time":"2026-04-15T09:03:44.551773112Z"}
+{"log":"2026-04-15T12:00:01.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.5.0\n","stream":"stdout","time":"2026-04-15T12:00:01.102304567Z"}
+{"log":"2026-04-15T12:00:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-04-15T12:00:01.205891234Z"}
+{"log":"2026-04-15T12:00:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 95ms\n","stream":"stderr","time":"2026-04-15T12:00:05.331442891Z"}
+{"log":"2026-04-15T12:01:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-04-15T12:01:12.884129445Z"}
+{"log":"GET /healthz 200 4ms\n","stream":"stdout","time":"2026-04-15T12:02:00.001000001Z"}
+{"log":"GET /metrics 200 12ms\n","stream":"stdout","time":"2026-04-15T12:02:00.015000002Z"}
+{"log":"2026-04-15T12:03:44.551Z INFO  [Thread-3] com.example.worker.Indexer - batch commit: documents=512, durationMs=791\n","stream":"stdout","time":"2026-04-15T12:03:44.551773112Z"}
+{"log":"2026-04-14T18:30:00.000Z INFO  [scheduled-task] c.e.api.jobs.ReportJob - exported rows=501, file=report_apr14.csv\n","stream":"stdout","time":"2026-04-14T18:30:00.000000001Z"}
+{"log":"2026-04-15T14:39:01.000Z INFO  [pool-2-thread-1] c.e.api.cache.RedisClient - cache warm-up complete, keys=4201\n","stream":"stdout","time":"2026-04-15T14:39:01.694327567Z"}
+{"log":"GET /api/v1/heartbeat 204 3ms\n","stream":"stdout","time":"2026-04-15T14:40:12.708405567Z"}
+{"log":"POST /api/v1/events 202 8ms\n","stream":"stdout","time":"2026-04-15T14:41:07.997976567Z"}
+{"log":"ERROR [http-nio-8080-exec-9] c.e.api.pay.PaymentClient - gateway timeout after 7120ms\n","stream":"stderr","time":"2026-04-15T14:42:18.334844567Z"}
+{"log":"WARN  [http-nio-8080-exec-3] c.e.api.auth.JwtFilter - token near expiry for subject=user_901\n","stream":"stderr","time":"2026-04-15T14:43:41.010462567Z"}
+{"log":"2026-04-15T17:08:00.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.5.0\n","stream":"stdout","time":"2026-04-15T17:08:00.102304567Z"}
+{"log":"2026-04-15T17:08:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-04-15T17:08:01.205891234Z"}
+{"log":"2026-04-15T17:08:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 95ms\n","stream":"stderr","time":"2026-04-15T17:08:05.331442891Z"}
+{"log":"2026-04-15T17:09:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-04-15T17:09:12.884129445Z"}
+{"log":"GET /api/v1/heartbeat 204 2ms\n","stream":"stdout","time":"2026-04-15T17:10:57.160400567Z"}
+{"log":"DEBUG [http-nio-8080-exec-7] c.e.api.web.RequestTrace - rid=a91c method=GET path=/api/v1/orders ms=58\n","stream":"stdout","time":"2026-04-15T17:11:35.503782567Z"}
+{"log":"2026-04-15T19:22:00.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.5.0\n","stream":"stdout","time":"2026-04-15T19:22:00.102304567Z"}
+{"log":"2026-04-15T19:22:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-04-15T19:22:01.205891234Z"}
+{"log":"2026-04-15T19:22:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 95ms\n","stream":"stderr","time":"2026-04-15T19:22:05.331442891Z"}
+{"log":"2026-04-15T19:23:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-04-15T19:23:12.884129445Z"}
+{"log":"POST /api/v1/events 202 19ms\n","stream":"stdout","time":"2026-04-15T19:24:06.782312567Z"}
+{"log":"2026-04-15T21:45:00.102Z INFO  [main] com.example.api.Bootstrap - Starting Example API v2.5.0\n","stream":"stdout","time":"2026-04-15T21:45:00.102304567Z"}
+{"log":"2026-04-15T21:45:01.205Z INFO  [main] org.springframework.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'\n","stream":"stdout","time":"2026-04-15T21:45:01.205891234Z"}
+{"log":"2026-04-15T21:45:05.331Z WARN  [http-nio-8080-exec-2] c.e.api.security.RateLimiter - client 203.0.113.50 exceeded burst; delaying 95ms\n","stream":"stderr","time":"2026-04-15T21:45:05.331442891Z"}
+{"log":"2026-04-15T21:46:12.884Z ERROR [http-nio-8080-exec-5] c.e.api.db.ConnectionPool - HikariPool-1 - Connection is not available, request timed out after 30000ms\n","stream":"stderr","time":"2026-04-15T21:46:12.884129445Z"}
+{"log":"GET /api/v1/heartbeat 204 1ms\n","stream":"stdout","time":"2026-04-15T21:47:50.353847567Z"}
+{"log":"2026-04-15T21:48:44.112Z INFO  [main] com.example.api.Bootstrap - health check OK\n","stream":"stdout","time":"2026-04-15T21:48:44.112304567Z"}
