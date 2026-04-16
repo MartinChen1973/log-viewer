@@ -546,6 +546,9 @@ def analyze_log(name: str):
     analysis = data.get("analysis")
     if not isinstance(analysis, str):
         analysis = ""
+    usage_items = data.get("usage_items")
+    if not isinstance(usage_items, list):
+        usage_items = []
     return jsonify(
         {
             "analysis": analysis,
@@ -554,6 +557,7 @@ def analyze_log(name: str):
             "profile": profile,
             "ai_error": None,
             "source_truncated": truncated,
+            "usage_items": usage_items,
         }
     )
 

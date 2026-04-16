@@ -361,6 +361,7 @@ function bindAiAnalyzeControls() {
           aiResultBodyEl,
           aiResultFooterEl,
           display,
+          out.data && out.data.usage_items,
         );
         return;
       }

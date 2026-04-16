@@ -11,6 +11,7 @@ import os
 import re
 import shutil
 import time
+import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -226,8 +227,31 @@ class AnalyzeLogRequest(BaseModel):
     source_size: int = Field(default=0, ge=0)
 
 
+class UsageItemOut(BaseModel):
+    ## ⬇️ One row in the log-viewer “分析结果” footer (skill / tool / agent × usage).
+    kind: Literal["skill", "tool", "agent"]
+    name: str = Field(..., min_length=1, max_length=512)
+    tokens: int | None = Field(
+        default=None,
+        description="Total tokens for this LLM step when applicable (often input+output).",
+    )
+    input_tokens: int | None = Field(
+        default=None,
+        description="Prompt/input tokens for this LLM step when the provider reports them.",
+    )
+    output_tokens: int | None = Field(
+        default=None,
+        description="Completion/output tokens for this LLM step when the provider reports them.",
+    )
+    cost_usd: float | None = Field(
+        default=None,
+        description="Provider-reported cost in USD when present in message metadata.",
+    )
+
+
 class AnalyzeLogResponse(BaseModel):
     analysis: str
+    usage_items: list[UsageItemOut] = Field(default_factory=list)
 
 
 class DeleteSessionResponse(BaseModel):
@@ -469,6 +493,7 @@ def _persist_model_settings(out: ModelSettingsOut) -> None:
 async def _reload_chat_model_and_agent(fastapi_app: FastAPI, model_str: str) -> None:
     new_model = init_chat_model(model_str)
     fastapi_app.state.chat_model = new_model
+    fastapi_app.state.current_model = model_str.strip()
     await _build_agent_and_mcp_status(fastapi_app)
 
 
@@ -627,6 +652,216 @@ def _content_to_text(content: Any) -> str:
                     parts.append(str(block["text"]))
         return "".join(parts)
     return str(content)
+
+
+def _coerce_int_optional(val: Any) -> int | None:
+    if val is None:
+        return None
+    try:
+        return int(val)
+    except (TypeError, ValueError):
+        return None
+
+
+def _coerce_float_optional(val: Any) -> float | None:
+    if val is None:
+        return None
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return None
+
+
+def _cost_from_usage_like_dict(d: dict[str, Any]) -> float | None:
+    ## ⬇️ Common keys on OpenAI-compatible and proxy providers (OpenRouter, Azure, etc.).
+    for key in (
+        "cost",
+        "cost_usd",
+        "total_cost",
+        "total_cost_usd",
+    ):
+        if key in d:
+            f = _coerce_float_optional(d[key])
+            if f is not None:
+                return f
+    return None
+
+
+def _usage_cost_from_ai_message(msg: Any) -> float | None:
+    ## ⬇️ Best-effort USD cost from AIMessage metadata (rare on OpenAI; some proxies include it).
+    if not isinstance(msg, AIMessage):
+        return None
+    um = getattr(msg, "usage_metadata", None)
+    if isinstance(um, dict):
+        c = _cost_from_usage_like_dict(um)
+        if c is not None:
+            return c
+    rm = getattr(msg, "response_metadata", None)
+    if not isinstance(rm, dict):
+        return None
+    c = _cost_from_usage_like_dict(rm)
+    if c is not None:
+        return c
+    tu = rm.get("token_usage")
+    if isinstance(tu, dict):
+        c = _cost_from_usage_like_dict(tu)
+        if c is not None:
+            return c
+    for nested_key in ("billing", "usage", "pricing", "model_extra"):
+        nested = rm.get(nested_key)
+        if isinstance(nested, dict):
+            c = _cost_from_usage_like_dict(nested)
+            if c is not None:
+                return c
+    return None
+
+
+def _usage_tokens_from_ai_message(msg: Any) -> tuple[int | None, int | None, int | None]:
+    ## ⬇️ Best-effort prompt / completion / total from LangChain AIMessage (provider-dependent).
+    prompt_t: int | None = None
+    completion_t: int | None = None
+    total_t: int | None = None
+    if not isinstance(msg, AIMessage):
+        return prompt_t, completion_t, total_t
+    um = getattr(msg, "usage_metadata", None)
+    if isinstance(um, dict):
+        prompt_t = _coerce_int_optional(um.get("input_tokens") or um.get("prompt_tokens"))
+        completion_t = _coerce_int_optional(um.get("output_tokens") or um.get("completion_tokens"))
+        total_t = _coerce_int_optional(um.get("total_tokens"))
+    rm = getattr(msg, "response_metadata", None)
+    if isinstance(rm, dict):
+        tu = rm.get("token_usage")
+        if isinstance(tu, dict):
+            if prompt_t is None:
+                prompt_t = _coerce_int_optional(tu.get("prompt_tokens") or tu.get("input_tokens"))
+            if completion_t is None:
+                completion_t = _coerce_int_optional(
+                    tu.get("completion_tokens") or tu.get("output_tokens")
+                )
+            if total_t is None:
+                total_t = _coerce_int_optional(tu.get("total_tokens"))
+    if total_t is None and prompt_t is not None and completion_t is not None:
+        total_t = prompt_t + completion_t
+    return prompt_t, completion_t, total_t
+
+
+def _tool_call_for_tool_message(messages: list[Any], idx: int, m: ToolMessage) -> Any | None:
+    ## ⬇️ Match ToolMessage to the AIMessage.tool_calls entry (for args / skill detection).
+    tid = getattr(m, "tool_call_id", None)
+    if not isinstance(tid, str) or not tid:
+        return None
+    for j in range(idx - 1, -1, -1):
+        prev = messages[j]
+        if not isinstance(prev, AIMessage):
+            continue
+        for tc in getattr(prev, "tool_calls", None) or []:
+            if _tool_call_id_from_obj(tc) == tid:
+                return tc
+    return None
+
+
+def _skill_id_from_tool_call_for_trace(tc: Any) -> str | None:
+    ## ⬇️ Skill package id from MCP playbook load or read_file path under skills/.
+    raw_name = _tool_call_name_from_obj(tc) or ""
+    norm = raw_name.lower().replace("-", "_")
+    if "get_log_analysis_skill_md" in norm:
+        args = _tool_call_args_from_obj(tc)
+        prof = args.get("profile")
+        if isinstance(prof, str) and prof.strip():
+            return prof.strip()
+        return None
+    args = _tool_call_args_from_obj(tc)
+    for key in ("path", "file_path", "target_file"):
+        val = args.get(key)
+        if isinstance(val, str):
+            for mo in _SKILL_DIR_FROM_PATH_RE.finditer(val.replace("\\", "/")):
+                return mo.group(1)
+    return None
+
+
+def _usage_items_from_analyze_trace(
+    messages: list[Any],
+    *,
+    model_label: str,
+    playbook_profile: str,
+    playbook_inlined: bool,
+) -> list[UsageItemOut]:
+    ## ⬇️ Chronological steps: optional inlined playbook skill, then each agent/tool/skill-from-tool turn.
+    ml = (model_label or "").strip() or "LLM"
+    items: list[UsageItemOut] = []
+    seen_skill_ids: set[str] = set()
+    if playbook_inlined and playbook_profile:
+        items.append(
+            UsageItemOut(
+                kind="skill",
+                name=f"{playbook_profile} (checklist in prompt)",
+                tokens=None,
+                input_tokens=None,
+                output_tokens=None,
+                cost_usd=None,
+            )
+        )
+        seen_skill_ids.add(playbook_profile)
+
+    agent_turn = 0
+    for idx, m in enumerate(messages):
+        if isinstance(m, (SystemMessage, HumanMessage)):
+            continue
+        if isinstance(m, AIMessage):
+            agent_turn += 1
+            _p, _c, tot_t = _usage_tokens_from_ai_message(m)
+            cost_u = _usage_cost_from_ai_message(m)
+            label = ml if agent_turn == 1 else f"{ml} (turn {agent_turn})"
+            items.append(
+                UsageItemOut(
+                    kind="agent",
+                    name=label,
+                    tokens=tot_t,
+                    input_tokens=_p,
+                    output_tokens=_c,
+                    cost_usd=cost_u,
+                )
+            )
+        elif isinstance(m, ToolMessage):
+            tname = _tool_message_name(m) or "tool"
+            items.append(
+                UsageItemOut(
+                    kind="tool",
+                    name=tname,
+                    tokens=None,
+                    input_tokens=None,
+                    output_tokens=None,
+                    cost_usd=None,
+                )
+            )
+            tc = _tool_call_for_tool_message(messages, idx, m)
+            if tc:
+                sid = _skill_id_from_tool_call_for_trace(tc)
+                if sid and sid not in seen_skill_ids:
+                    seen_skill_ids.add(sid)
+                    items.append(
+                        UsageItemOut(
+                            kind="skill",
+                            name=sid,
+                            tokens=None,
+                            input_tokens=None,
+                            output_tokens=None,
+                            cost_usd=None,
+                        )
+                    )
+
+    if not any(it.kind == "agent" for it in items):
+        items.append(
+            UsageItemOut(
+                kind="agent",
+                name=ml,
+                tokens=None,
+                input_tokens=None,
+                output_tokens=None,
+                cost_usd=None,
+            )
+        )
+    return items
 
 
 def _last_assistant_reply(messages: list[Any]) -> str:
@@ -806,6 +1041,16 @@ def _tool_call_args_from_obj(tc: Any) -> dict[str, Any]:
         return a if isinstance(a, dict) else {}
     a = getattr(tc, "args", None)
     return a if isinstance(a, dict) else {}
+
+
+def _tool_call_id_from_obj(tc: Any) -> str | None:
+    if isinstance(tc, dict):
+        x = tc.get("id")
+        return str(x).strip() if x else None
+    x = getattr(tc, "id", None)
+    if isinstance(x, str) and x.strip():
+        return x.strip()
+    return None
 
 
 def _ordered_tool_uses(messages: list[Any]) -> list[str]:
@@ -1219,6 +1464,7 @@ async def lifespan(fastapi_app: FastAPI):
     async with AsyncSqliteSaver.from_conn_string(str(CHECKPOINT_DB_PATH)) as checkpointer:
         await checkpointer.setup()
         fastapi_app.state.chat_model = model
+        fastapi_app.state.current_model = ms.current_model.strip()
         fastapi_app.state.checkpointer = checkpointer
         await _build_agent_and_mcp_status(fastapi_app)
         logger.info("Long-term memory directory (global): %s", GLOBAL_MEMORIES_DIR)
@@ -1263,7 +1509,7 @@ def _prompt_for_log_analysis(
     *,
     skill_playbook_md: str | None = None,
 ) -> str:
-    ## ⬇️ Single-turn analysis for the log-viewer preset slice (no tools, no thread).
+    ## ⬇️ User message for log-viewer preset slice; `/analyze-log` runs the deep agent on a fresh thread.
     playbook_block = ""
     if skill_playbook_md:
         playbook_block = (
@@ -1562,20 +1808,45 @@ async def chat(body: ChatRequest) -> ChatResponse:
 
 @app.post("/analyze-log", response_model=AnalyzeLogResponse)
 async def analyze_log_http(body: AnalyzeLogRequest) -> AnalyzeLogResponse:
-    ## ⬇️ Called by log-viewer `backend` (`AI_ANALYZE_URL`, default port 8500); returns `{ analysis }` only.
-    model = getattr(app.state, "chat_model", None)
-    if model is None:
-        raise HTTPException(status_code=503, detail="Model not initialized")
+    ## ⬇️ Called by log-viewer `backend` (`AI_ANALYZE_URL`, default port 8500); uses deep agent for a full trace.
+    agent = getattr(app.state, "agent", None)
+    if agent is None:
+        raise HTTPException(status_code=503, detail="Agent not initialized")
     playbook_md, load_status = _read_log_analyzer_skill_playbook(body.log_profile)
     prompt = _prompt_for_log_analysis(body, skill_playbook_md=playbook_md)
+    thread_id = f"log-analyze-{uuid.uuid4().hex}"
+    config = {"configurable": {"thread_id": thread_id}}
+    model_label = getattr(app.state, "current_model", None)
+    if not isinstance(model_label, str):
+        model_label = ""
     t0 = time.perf_counter()
     try:
-        raw = await model.ainvoke([HumanMessage(content=prompt)])
-        analysis = _content_to_text(getattr(raw, "content", raw))
+        result = await agent.ainvoke(
+            {"messages": [{"role": "user", "content": prompt}]},
+            config,
+        )
     except Exception as e:
         elapsed_ms = int((time.perf_counter() - t0) * 1000)
         logger.exception("POST /analyze-log failed after %sms", elapsed_ms)
         raise HTTPException(status_code=500, detail=str(e)) from e
+    raw_messages = list(result.get("messages") or [])
+    try:
+        snap_after = await agent.aget_state(config)
+        state_msgs = list((snap_after.values or {}).get("messages") or [])
+        if state_msgs:
+            raw_messages = state_msgs
+    except Exception:
+        logger.debug(
+            "aget_state after /analyze-log failed; using invoke result messages",
+            exc_info=True,
+        )
+    analysis = _last_assistant_reply(raw_messages)
+    usage_items = _usage_items_from_analyze_trace(
+        raw_messages,
+        model_label=model_label,
+        playbook_profile=(body.log_profile or "").strip(),
+        playbook_inlined=(load_status == "loaded" and bool(playbook_md)),
+    )
     elapsed_ms = int((time.perf_counter() - t0) * 1000)
     logger.info(
         "POST /analyze-log ok elapsed_ms=%s log_name=%r preset=%r playbook=%s out_len=%s",
@@ -1586,7 +1857,7 @@ async def analyze_log_http(body: AnalyzeLogRequest) -> AnalyzeLogResponse:
         len(analysis),
     )
     analysis = analysis.rstrip() + _analyze_log_skill_usage_footer(body.log_profile, load_status)
-    return AnalyzeLogResponse(analysis=analysis)
+    return AnalyzeLogResponse(analysis=analysis, usage_items=usage_items)
 
 
 @app.delete("/sessions/{session_id}", response_model=DeleteSessionResponse)

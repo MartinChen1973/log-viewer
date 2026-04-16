@@ -784,6 +784,114 @@ body:not(:has(> main.layout-index)) .timeline-pane {
   color: var(--text);
 }
 
+/* Structured step table (usage_items); overrides mono/pre-wrap so rows read as a table */
+.ai-analyze-result__skill-footer--steps {
+  white-space: normal;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+}
+
+.ai-analyze-result__usage-wrap {
+  font-family: inherit;
+  white-space: normal;
+}
+
+.ai-analyze-result__usage-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.45rem;
+  letter-spacing: 0.02em;
+}
+
+.ai-analyze-result__usage-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.ai-analyze-result__usage-table thead th {
+  padding: 0.35rem 0.45rem;
+  text-align: left;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  vertical-align: bottom;
+}
+
+.ai-analyze-result__usage-table thead th:first-child {
+  width: 2rem;
+  text-align: center;
+}
+
+.ai-analyze-result__usage-table thead th:nth-child(2) {
+  width: 3.25rem;
+}
+
+.ai-analyze-result__usage-table thead th:nth-child(4),
+.ai-analyze-result__usage-table thead th:nth-child(5),
+.ai-analyze-result__usage-table thead th:nth-child(6),
+.ai-analyze-result__usage-table thead th:nth-child(7) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ai-analyze-result__usage-table tbody td {
+  padding: 0.4rem 0.45rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+  word-break: break-word;
+}
+
+.ai-analyze-result__usage-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ai-analyze-result__usage-table tfoot td {
+  padding: 0.45rem 0.45rem 0.35rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+}
+
+.ai-analyze-result__usage-foot-label {
+  font-weight: 600;
+  color: var(--muted);
+  text-align: right;
+}
+
+.ai-analyze-result__usage-col-num {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.ai-analyze-result__usage-col-kind {
+  color: var(--muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.ai-analyze-result__usage-col-name {
+  color: var(--text);
+  min-width: 6rem;
+}
+
+.ai-analyze-result__usage-col-metric,
+.ai-analyze-result__usage-col-cost {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  font-size: 0.74rem;
+}
+
+.ai-analyze-result__usage-col-cost {
+  min-width: 4.25rem;
+}
+
 .timeline-title {
   margin: 0;
   font-size: 1rem;
