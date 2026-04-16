@@ -66,7 +66,7 @@ timeout /t 3 /nobreak >nul
 
 
 
-REM 3b) MCP log-analyzer (28084) — aiend/skills/* for POST /analyze-log
+REM 3b) MCP log-analyzer (28084) — ai-api/skills/* log playbooks for MCP tools
 
 python -m pip install -q -r "%ROOT%\mcp-servers\mcp-log-analyzer\requirements.txt"
 

@@ -1,5 +1,5 @@
 """
-MCP server: log analysis skill playbooks from `aiend/skills/<profile>/SKILL.md`.
+MCP server: log analysis skill playbooks from `ai-api/skills/<profile>/SKILL.md`.
 
 Streamable HTTP at http://<host>:<port>/mcp (default 127.0.0.1:28084; use with ai-api POST /analyze-log).
 """
@@ -16,7 +16,7 @@ from mcp.server.fastmcp import FastMCP
 from starlette.responses import HTMLResponse, JSONResponse, Response
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
-_SKILLS_ROOT = _REPO_ROOT / "aiend" / "skills"
+_SKILLS_ROOT = _REPO_ROOT / "ai-api" / "skills"
 
 # Repo-root .env; override=False so launcher MCP_PORT wins over .env.
 load_dotenv(_REPO_ROOT / ".env", override=False)
@@ -25,13 +25,18 @@ _host = os.environ.get("MCP_HOST", "127.0.0.1")
 _port = int(os.environ.get("MCP_PORT", "28084"))
 
 _PROFILE_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9_-]{0,127}$")
+## ⬇️ Only `log-analyzer-*` packages are log playbooks; `ai-api/skills/` also holds other agent skills (e.g. action-finder).
+_LOG_SKILL_PREFIX = "log-analyzer-"
 
 mcp = FastMCP(
     "log-analyzer",
     instructions=(
-        "Exposes log-analysis SKILL.md playbooks under aiend/skills/. "
+        "Exposes log-analysis SKILL.md playbooks: subfolders of ai-api/skills/ whose names start with "
+        f"`{_LOG_SKILL_PREFIX}` (other skills in the same folder are for the chat agent only). "
         "Call list_log_analysis_profiles first if unsure, then get_log_analysis_skill_md(profile) "
-        "for the checklist matching the log type (e.g. log-access for HTTP access logs)."
+        "for the checklist matching the log type. Examples: log-analyzer-access (HTTP access), "
+        "log-analyzer-nginx-error (Nginx error_log), log-analyzer-docker (Docker JSON log driver), "
+        "log-analyzer-mysql (mysqld error log), log-analyzer-java (JVM/Spring), log-analyzer-generic (fallback)."
     ),
     host=_host,
     port=_port,
@@ -39,28 +44,32 @@ mcp = FastMCP(
 
 
 def _allowed_profiles() -> list[str]:
-    # Directories under aiend/skills/ that contain SKILL.md.
+    ## ⬇️ Log playbooks only (`log-analyzer-*`); excludes e.g. action-finder in the shared skills tree.
     if not _SKILLS_ROOT.is_dir():
         return []
     out: list[str] = []
     for p in sorted(_SKILLS_ROOT.iterdir(), key=lambda x: x.name.lower()):
-        if p.is_dir() and (p / "SKILL.md").is_file():
+        if (
+            p.is_dir()
+            and p.name.startswith(_LOG_SKILL_PREFIX)
+            and (p / "SKILL.md").is_file()
+        ):
             out.append(p.name)
     return out
 
 
 @mcp.tool()
 def list_log_analysis_profiles() -> str:
-    """List available log analysis profile ids (subfolders of aiend/skills/ with SKILL.md)."""
+    """List available log analysis profile ids (`ai-api/skills/log-analyzer-*/SKILL.md`)."""
     ids = _allowed_profiles()
     if not ids:
-        return "No profiles found. Ensure repo has aiend/skills/<profile>/SKILL.md."
+        return f"No profiles found. Ensure repo has ai-api/skills/{_LOG_SKILL_PREFIX}<id>/SKILL.md."
     return "Available profiles: " + ", ".join(ids)
 
 
 @mcp.tool()
 def get_log_analysis_skill_md(profile: str) -> str:
-    """Load SKILL.md for a profile (e.g. log-generic, log-access, log-java). Used during AI log analysis."""
+    """Load SKILL.md for a profile (e.g. log-analyzer-generic, log-analyzer-access). Used during AI log analysis."""
     raw = (profile or "").strip()
     if not raw or not _PROFILE_RE.match(raw):
         return f"Invalid profile id: {profile!r}. Use letters, digits, underscore, hyphen only."
@@ -79,7 +88,7 @@ _OPENAPI_SPEC = {
     "info": {
         "title": "MCP log analyzer",
         "version": "1.0.0",
-        "description": "Log analysis skills from aiend/skills/. MCP protocol: POST /mcp",
+        "description": "Log analysis skills from ai-api/skills/. MCP protocol: POST /mcp",
     },
     "paths": {
         "/mcp": {

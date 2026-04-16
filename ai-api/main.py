@@ -78,6 +78,11 @@ _ATTRIBUTION_SKILL_LINE_RE = re.compile(
     r"^\s*I followed the skill package\(s\):\s*[^\n]+\n*",
     re.IGNORECASE,
 )
+## ⬇️ Strip server-prepended **Skill usage** lines if the model echoed them
+_ATTRIBUTION_SKILL_USAGE_RE = re.compile(
+    r"^\s*\*\*Skill usage(?: \([^)]+\))?\*\*:\s*[^\n]+\n*",
+    re.IGNORECASE,
+)
 ## ⬇️ Skill dir segment in virtual paths or Windows paths (`.../skills/<id>/...` or `...\skills\<id>\...`)
 _SKILL_DIR_FROM_PATH_RE = re.compile(r"skills[/\\]([^/\\]+)")
 ## ⬇️ When only the parent graph sees `task`, infer action-finder from prompts + typical CRUD output
@@ -213,7 +218,7 @@ class AnalyzeLogRequest(BaseModel):
     ## ⬇️ Body from log-viewer Flask `POST /api/logs/<name>/analyze` (proxied to this endpoint).
     log_name: str = Field(..., min_length=1, max_length=512)
     preset: str = Field(..., min_length=1, max_length=64)
-    log_profile: str = Field(default="generic", max_length=256)
+    log_profile: str = Field(default="log-analyzer-generic", max_length=256)
     content: str = Field(..., max_length=4_000_000)
     approx_tokens: int = Field(default=0, ge=0, le=10_000_000)
     byte_length: int = Field(default=0, ge=0)
@@ -829,6 +834,27 @@ def _ordered_tool_uses(messages: list[Any]) -> list[str]:
     return out
 
 
+def _skill_ids_from_log_playbook_mcp_tools(messages: list[Any]) -> list[str]:
+    ## ⬇️ MCP log analyzer `get_log_analysis_skill_md(profile=...)` loads a playbook package id
+    seen: set[str] = set()
+    out: list[str] = []
+    for m in messages:
+        if not isinstance(m, AIMessage):
+            continue
+        for tc in getattr(m, "tool_calls", None) or []:
+            name = _tool_call_name_from_obj(tc) or ""
+            if "get_log_analysis_skill_md" not in name.replace("-", "_"):
+                continue
+            args = _tool_call_args_from_obj(tc)
+            prof = args.get("profile")
+            if isinstance(prof, str) and prof.strip():
+                sid = prof.strip()
+                if sid not in seen:
+                    seen.add(sid)
+                    out.append(sid)
+    return out
+
+
 def _skill_ids_from_tool_call_paths(messages: list[Any]) -> list[str]:
     ## ⬇️ Any tool call whose args reference `/skills/<id>/...` (read_file, write_file, execute, etc.)
     seen: set[str] = set()
@@ -916,6 +942,10 @@ def _strip_prior_attribution(reply: str) -> str:
         if m2:
             t = t[m2.end() :].lstrip()
             continue
+        m3 = _ATTRIBUTION_SKILL_USAGE_RE.match(t)
+        if m3:
+            t = t[m3.end() :].lstrip()
+            continue
         break
     return t
 
@@ -929,19 +959,32 @@ def _tool_attribution_display_names(names: list[str]) -> list[str]:
     return out
 
 
-def _ensure_tool_attribution(reply: str, tools_used: list[str], skills_used: list[str]) -> str:
-    ## ⬇️ Prefix from ToolMessages / tool_calls + skill hints; strip any prior attribution from the model
-    if not tools_used and not skills_used:
-        return reply
+def _ensure_tool_attribution(
+    reply: str,
+    tools_used: list[str],
+    skills_used: list[str],
+    *,
+    skills_enabled: bool,
+) -> str:
+    ## ⬇️ Prepends tool list + mandatory **Skill usage** line; strips model-duplicated attribution
+    body = _strip_prior_attribution(reply)
     blocks: list[str] = []
     if tools_used:
         listed = ", ".join(_tool_attribution_display_names(tools_used))
         blocks.append(f"To answer this question, I used the following tool(s): {listed}.")
-    if skills_used:
-        sk = ", ".join(f"📚 {s}" for s in skills_used)
-        blocks.append(f"I followed the skill package(s): {sk}.")
+    if skills_enabled:
+        if skills_used:
+            blocks.append("**Skill usage (this turn):** " + ", ".join(skills_used) + ".")
+        else:
+            blocks.append(
+                "**Skill usage (this turn):** None — no bundled skill under `/skills/` was read, "
+                "and no log playbook was loaded via MCP (e.g. `get_log_analysis_skill_md`)."
+            )
+    else:
+        blocks.append(
+            "**Skill usage:** N/A — bundled `/skills/` is not mounted for this agent run."
+        )
     prefix = "\n\n".join(blocks) + "\n\n"
-    body = _strip_prior_attribution(reply)
     return prefix + body
 
 
@@ -996,8 +1039,9 @@ def _compose_agent_system_prompt(
             "Supporting files use paths such as `/skills/<skill-dir>/references/...`. "
             "For shell execution, script paths must use real filesystem paths (e.g. under `AI_API_SKILLS_ROOT`), "
             "not only virtual `/skills/...` paths. "
-            "The API may add a line to your reply listing which skill package(s) were followed when you read "
-            "under `/skills/...` or call `action_finder_log`. "
+            "The API prepends **Skill usage (this turn):** to every reply (lists package ids read from `/skills/...`, "
+            "MCP `get_log_analysis_skill_md`, or `action_finder_log` traces). "
+            "Do not duplicate that line or add your own **Skill usage** footer. "
         )
     if mcp_tools:
         system_prompt += (
@@ -1138,6 +1182,7 @@ async def _build_agent_and_mcp_status(fastapi_app: FastAPI) -> McpSettingsRespon
         skills=skills_arg,
     )
     fastapi_app.state.agent = agent
+    fastapi_app.state.skills_enabled = bool(skills_arg)
     mcp_names = _sorted_unique_mcp_tool_names(mcp_tools)
     skill_rows = _discover_skills(SKILLS_DIR)
     resp = _mcp_settings_response_from_load(
@@ -1198,12 +1243,42 @@ def _preview(text: str, max_len: int = 80) -> str:
     return t[: max_len - 1] + "…"
 
 
-def _prompt_for_log_analysis(body: AnalyzeLogRequest) -> str:
+def _read_log_analyzer_skill_playbook(profile: str) -> tuple[str | None, Literal["loaded", "missing", "invalid"]]:
+    ## ⬇️ `ai-api/skills/<profile>/SKILL.md` — same files as MCP `get_log_analysis_skill_md`
+    raw = (profile or "").strip()
+    if not raw or not _SKILL_ID_RE.match(raw):
+        return None, "invalid"
+    path = SKILLS_DIR / raw / "SKILL.md"
+    if not path.is_file():
+        return None, "missing"
+    try:
+        return path.read_text(encoding="utf-8"), "loaded"
+    except OSError:
+        logger.exception("Failed to read skill playbook %s", path)
+        return None, "missing"
+
+
+def _prompt_for_log_analysis(
+    body: AnalyzeLogRequest,
+    *,
+    skill_playbook_md: str | None = None,
+) -> str:
     ## ⬇️ Single-turn analysis for the log-viewer preset slice (no tools, no thread).
+    playbook_block = ""
+    if skill_playbook_md:
+        playbook_block = (
+            "--- skill playbook (follow this checklist and output guidance) ---\n"
+            f"{skill_playbook_md}\n"
+            "--- end skill playbook ---\n\n"
+            "Apply the playbook above together with the log excerpt. Where the playbook's **Output** or "
+            "**Checklist** conflicts with the default section titles below, prefer the playbook's structure "
+            "for the technical substance; you may still use Chinese section headings as in the playbook or below.\n\n"
+        )
     return (
         "You are a senior SRE. Analyze the log excerpt below.\n\n"
-        f"- Log file: {body.log_name}\n"
-        f"- Profile hint: {body.log_profile}\n"
+        + playbook_block
+        + f"- Log file: {body.log_name}\n"
+        f"- Profile: {body.log_profile}\n"
         f"- Window preset: {body.preset}\n"
         f"- Approx. tokens (excerpt): {body.approx_tokens}; bytes: {body.byte_length}; "
         f"full file size: {body.source_size}; truncated: {body.source_truncated}\n\n"
@@ -1221,6 +1296,28 @@ def _prompt_for_log_analysis(body: AnalyzeLogRequest) -> str:
         "--- log excerpt ---\n"
         f"{body.content}\n"
         "--- end ---"
+    )
+
+
+def _analyze_log_skill_usage_footer(profile: str, load_status: Literal["loaded", "missing", "invalid"]) -> str:
+    ## ⬇️ Honest Chinese summary for the log-viewer UI (playbook loaded from disk vs hint-only)
+    pid = (profile or "").strip()
+    if load_status == "loaded":
+        return (
+            "\n\n---\n**技能使用情况（Skill usage）：** 本次已将 `ai-api/skills/"
+            f"{pid}/SKILL.md` **全文**载入提示词并作为分析 checklist；"
+            "与 MCP `get_log_analysis_skill_md` 使用同一文件。\n"
+        )
+    if load_status == "invalid":
+        return (
+            "\n\n---\n**技能使用情况（Skill usage）：** profile `"
+            f"{pid}` 不是合法技能目录名，未加载 playbook；"
+            "请使用与 `ai-api/skills/<id>/` 一致的 id（例如 `log-analyzer-mysql`）。\n"
+        )
+    return (
+        "\n\n---\n**技能使用情况（Skill usage）：** 未找到 `ai-api/skills/"
+        f"{pid}/SKILL.md`（文件缺失或不可读），"
+        "本次仅将 profile 名称作为文本提示；请确认该技能包已部署在 `ai-api/skills/` 下。\n"
     )
 
 
@@ -1448,10 +1545,18 @@ async def chat(body: ChatRequest) -> ChatResponse:
     used = _ordered_tool_uses(delta_messages)
     skill_from_paths = _skill_ids_from_tool_call_paths(delta_messages)
     skills_used = _merge_skill_hints(used, skill_from_paths)
+    for sid in _skill_ids_from_log_playbook_mcp_tools(delta_messages):
+        if sid not in skills_used:
+            skills_used.append(sid)
     used, skills_used = _rewrite_task_delegation_to_action_finder_skill(
         used, skills_used, reply, delta_messages
     )
-    reply = _ensure_tool_attribution(reply, used, skills_used)
+    reply = _ensure_tool_attribution(
+        reply,
+        used,
+        skills_used,
+        skills_enabled=getattr(app.state, "skills_enabled", False),
+    )
     return ChatResponse(reply=reply)
 
 
@@ -1461,7 +1566,8 @@ async def analyze_log_http(body: AnalyzeLogRequest) -> AnalyzeLogResponse:
     model = getattr(app.state, "chat_model", None)
     if model is None:
         raise HTTPException(status_code=503, detail="Model not initialized")
-    prompt = _prompt_for_log_analysis(body)
+    playbook_md, load_status = _read_log_analyzer_skill_playbook(body.log_profile)
+    prompt = _prompt_for_log_analysis(body, skill_playbook_md=playbook_md)
     t0 = time.perf_counter()
     try:
         raw = await model.ainvoke([HumanMessage(content=prompt)])
@@ -1472,12 +1578,14 @@ async def analyze_log_http(body: AnalyzeLogRequest) -> AnalyzeLogResponse:
         raise HTTPException(status_code=500, detail=str(e)) from e
     elapsed_ms = int((time.perf_counter() - t0) * 1000)
     logger.info(
-        "POST /analyze-log ok elapsed_ms=%s log_name=%r preset=%r out_len=%s",
+        "POST /analyze-log ok elapsed_ms=%s log_name=%r preset=%r playbook=%s out_len=%s",
         elapsed_ms,
         body.log_name[:64],
         body.preset,
+        load_status,
         len(analysis),
     )
+    analysis = analysis.rstrip() + _analyze_log_skill_usage_footer(body.log_profile, load_status)
     return AnalyzeLogResponse(analysis=analysis)
 
 

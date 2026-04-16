@@ -771,6 +771,19 @@ body:not(:has(> main.layout-index)) .timeline-pane {
   color: var(--text);
 }
 
+.ai-analyze-result__skill-footer {
+  margin: 0;
+  padding: 0.55rem 1rem 0.7rem;
+  border-top: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--accent-soft) 55%, var(--surface));
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+}
+
 .timeline-title {
   margin: 0;
   font-size: 1rem;

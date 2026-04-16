@@ -1,8 +1,10 @@
 import { fetchJson } from "./api.js";
 import {
+  clearAnalyzeSkillFooter,
   fetchAnalyzePresets,
   fillPresetSelect,
   postLogAnalyze,
+  renderAnalyzeResultWithSkillFooter,
 } from "./ai-analyze.js";
 import { localDateYmd } from "./date-parse.js";
 import {
@@ -38,6 +40,7 @@ const aiPresetSelectEl = document.getElementById("ai-preset-select");
 const aiRunEl = document.getElementById("ai-analyze-run");
 const aiResultEl = document.getElementById("ai-analyze-result");
 const aiResultBodyEl = document.getElementById("ai-analyze-result-body");
+const aiResultFooterEl = document.getElementById("ai-analyze-result-footer");
 const aiCloseEl = document.getElementById("ai-analyze-close");
 
 const MSG_ANALYZING = "正在分析…";
@@ -58,6 +61,7 @@ function hideAiAnalyzeUi() {
   if (aiToolbarEl) aiToolbarEl.hidden = true;
   if (aiResultEl) aiResultEl.hidden = true;
   if (aiResultBodyEl) aiResultBodyEl.textContent = "";
+  clearAnalyzeSkillFooter(aiResultFooterEl);
   if (aiRunEl) aiRunEl.disabled = false;
 }
 
@@ -344,6 +348,7 @@ function bindAiAnalyzeControls() {
     if (!preset) return;
     aiRunEl.disabled = true;
     if (aiResultEl) aiResultEl.hidden = false;
+    clearAnalyzeSkillFooter(aiResultFooterEl);
     if (aiResultBodyEl) aiResultBodyEl.textContent = MSG_ANALYZING;
     try {
       const out = await postLogAnalyze(timelineLogName, preset);
@@ -351,15 +356,22 @@ function bindAiAnalyzeControls() {
       if (out.ok) {
         const raw = out.data && out.data.analysis;
         const text = typeof raw === "string" ? raw : "";
-        aiResultBodyEl.textContent = text.length ? text : MSG_EMPTY_ANALYSIS;
+        const display = text.length ? text : MSG_EMPTY_ANALYSIS;
+        renderAnalyzeResultWithSkillFooter(
+          aiResultBodyEl,
+          aiResultFooterEl,
+          display,
+        );
         return;
       }
       aiResultBodyEl.textContent = out.message || "(未知错误)";
+      clearAnalyzeSkillFooter(aiResultFooterEl);
     } catch (e) {
       if (aiResultBodyEl) {
         aiResultBodyEl.textContent =
           "分析失败: " + ((e && e.message) || String(e));
       }
+      clearAnalyzeSkillFooter(aiResultFooterEl);
     } finally {
       aiRunEl.disabled = false;
     }

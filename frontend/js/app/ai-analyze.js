@@ -1,5 +1,7 @@
 import { fetchJson, postJsonAnalyzed } from "./api.js";
 
+const SKILL_USAGE_FOOTER_RE = /\n\n---\n(\*\*技能使用情况（Skill usage）[:：]\*\*[\s\S]*)$/;
+
 const PATH_PRESETS = "/analyze-presets";
 const PATH_ANALYZE = "/analyze";
 const KEY_PRESET = "preset";
@@ -22,6 +24,51 @@ export function postLogAnalyze(name, presetId) {
  * @param {HTMLSelectElement} selectEl
  * @param {Array<{ id: string, label: string, approx_tokens?: number }>} presets
  */
+/**
+ * Extracts the skill-usage appendix from ai-api `/analyze-log` (after `---`).
+ * @param {string} text
+ * @returns {string}
+ */
+export function extractSkillUsageFooter(text) {
+  if (typeof text !== "string" || !text) {
+    return "";
+  }
+  const m = text.match(SKILL_USAGE_FOOTER_RE);
+  return m ? m[1].trim() : "";
+}
+
+/**
+ * Fills the main `<pre>` with full analysis and optionally shows a duplicate skill-usage block below.
+ * @param {HTMLElement | null} bodyEl
+ * @param {HTMLElement | null} footerEl
+ * @param {string} fullText
+ */
+export function renderAnalyzeResultWithSkillFooter(bodyEl, footerEl, fullText) {
+  const t = typeof fullText === "string" ? fullText : "";
+  if (bodyEl) {
+    bodyEl.textContent = t;
+  }
+  if (!footerEl) {
+    return;
+  }
+  const foot = extractSkillUsageFooter(t);
+  if (foot) {
+    footerEl.textContent = foot;
+    footerEl.hidden = false;
+  } else {
+    footerEl.textContent = "";
+    footerEl.hidden = true;
+  }
+}
+
+/** @param {HTMLElement | null} footerEl */
+export function clearAnalyzeSkillFooter(footerEl) {
+  if (footerEl) {
+    footerEl.textContent = "";
+    footerEl.hidden = true;
+  }
+}
+
 export function fillPresetSelect(selectEl, presets) {
   selectEl.innerHTML = "";
   for (let i = 0; i < presets.length; i++) {

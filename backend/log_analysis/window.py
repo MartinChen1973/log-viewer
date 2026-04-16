@@ -1,4 +1,4 @@
-## Time-window presets and line filtering for AI log analysis (server local clock).
+## ⬇️ Time-window presets and line filtering for AI log analysis (server local clock).
 from __future__ import annotations
 
 import calendar

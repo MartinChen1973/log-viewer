@@ -1,8 +1,10 @@
 import { fetchJson } from "./app/api.js";
 import {
+  clearAnalyzeSkillFooter,
   fetchAnalyzePresets,
   fillPresetSelect,
   postLogAnalyze,
+  renderAnalyzeResultWithSkillFooter,
 } from "./app/ai-analyze.js";
 
 const BYTE_DIV_1024 = 1024;
@@ -19,6 +21,7 @@ const aiSelectEl = document.getElementById("view-ai-preset");
 const aiRunEl = document.getElementById("view-ai-run");
 const aiResultEl = document.getElementById("view-ai-result");
 const aiResultBodyEl = document.getElementById("view-ai-result-body");
+const aiResultFooterEl = document.getElementById("view-ai-result-footer");
 const aiCloseEl = document.getElementById("view-ai-close");
 
 const MSG_ANALYZING = "正在分析…";
@@ -42,6 +45,7 @@ function hideViewAi() {
   if (aiBarEl) aiBarEl.hidden = true;
   if (aiResultEl) aiResultEl.hidden = true;
   if (aiResultBodyEl) aiResultBodyEl.textContent = "";
+  clearAnalyzeSkillFooter(aiResultFooterEl);
   if (aiRunEl) aiRunEl.disabled = false;
 }
 
@@ -67,6 +71,7 @@ function wireViewAiControls() {
     if (!preset) return;
     aiRunEl.disabled = true;
     if (aiResultEl) aiResultEl.hidden = false;
+    clearAnalyzeSkillFooter(aiResultFooterEl);
     if (aiResultBodyEl) aiResultBodyEl.textContent = MSG_ANALYZING;
     try {
       const out = await postLogAnalyze(activeViewLogName, preset);
@@ -74,15 +79,22 @@ function wireViewAiControls() {
       if (out.ok) {
         const raw = out.data && out.data.analysis;
         const text = typeof raw === "string" ? raw : "";
-        aiResultBodyEl.textContent = text.length ? text : MSG_EMPTY_ANALYSIS;
+        const display = text.length ? text : MSG_EMPTY_ANALYSIS;
+        renderAnalyzeResultWithSkillFooter(
+          aiResultBodyEl,
+          aiResultFooterEl,
+          display,
+        );
         return;
       }
       aiResultBodyEl.textContent = out.message || "(未知错误)";
+      clearAnalyzeSkillFooter(aiResultFooterEl);
     } catch (e) {
       if (aiResultBodyEl) {
         aiResultBodyEl.textContent =
           "分析失败: " + ((e && e.message) || String(e));
       }
+      clearAnalyzeSkillFooter(aiResultFooterEl);
     } finally {
       aiRunEl.disabled = false;
     }

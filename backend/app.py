@@ -3,7 +3,6 @@ import calendar
 import json
 import os
 import re
-import sys
 import urllib.error
 import urllib.request
 from datetime import date, timedelta
@@ -14,13 +13,15 @@ from flask import Flask, Response, jsonify, request, send_from_directory
 
 _BACKEND_DIR = Path(__file__).resolve().parent
 _REPO_ROOT = _BACKEND_DIR.parent
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
 
+from log_analysis.profile import resolve_profile
+from log_analysis.window import (
+    PRESET_ORDER,
+    approx_tokens_from_bytes,
+    preset_stats_for_capped_text,
+    slice_for_preset,
+)
 from paths import get_log_root
-
-from aiend.profile import resolve_profile
-from aiend.window import PRESET_ORDER, approx_tokens_from_bytes, preset_stats_for_capped_text, slice_for_preset
 _FRONTEND_DIR = _REPO_ROOT / "frontend"
 _OPENAPI_PATH = _BACKEND_DIR / "openapi.json"
 
